@@ -71,4 +71,3 @@ Map<String, dynamic> _$UsageStatisticsToJson(UsageStatistics instance) =>
       'mostUsedWords': instance.mostUsedWords,
       'recentWords': instance.recentWords,
     };
-

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:uuid/uuid.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/settings_provider.dart';
 import '../models/vocabulary_item.dart';
@@ -9,13 +13,6 @@ import '../models/app_settings.dart';
 import '../services/storage_service.dart';
 import '../services/tts_service.dart';
 import '../utils/image_helper.dart';
-import 'package:uuid/uuid.dart';
-import 'package:share_plus/share_plus.dart';
-import 'dart:convert';
-
-// Conditional imports for non-web platforms
-import 'dart:io' if (dart.library.html) 'package:awaz/services/file_stub.dart' as io;
-import 'package:path_provider/path_provider.dart' if (dart.library.html) 'package:awaz/services/path_provider_stub.dart' as path_provider;
 
 class CaregiverDashboardScreen extends StatefulWidget {
   const CaregiverDashboardScreen({super.key});
@@ -374,26 +371,16 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       final data = await _storageService.exportAllData();
       final jsonString = jsonEncode(data);
       
-      if (kIsWeb) {
-        // Web: Use share_plus to download the file
-        if (context.mounted) {
-          await Share.share(jsonString, subject: 'Awaz Backup');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Data exported successfully')),
-          );
-        }
-      } else {
-        // Mobile/Desktop: Save to file and share
-        final directory = await path_provider.getApplicationDocumentsDirectory();
-        final file = io.File('${directory.path}/awaz_backup_${DateTime.now().millisecondsSinceEpoch}.json');
-        await file.writeAsString(jsonString);
-        
-        if (context.mounted) {
-          await Share.shareXFiles([XFile(file.path)]);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Data exported successfully')),
-          );
-        }
+      // Android: Save to file and share
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/awaz_backup_${DateTime.now().millisecondsSinceEpoch}.json');
+      await file.writeAsString(jsonString);
+      
+      if (context.mounted) {
+        await Share.shareXFiles([XFile(file.path)]);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data exported successfully')),
+        );
       }
     } catch (e) {
       if (context.mounted) {

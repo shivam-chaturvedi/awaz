@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/vocabulary_item.dart';
 import '../utils/color_utils.dart';
 import '../utils/image_helper.dart';

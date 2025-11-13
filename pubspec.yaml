@@ -1,6 +1,8 @@
 name: awaz
-description: "An assistive communication app for people with disabilities - AAC app without AI features"
-publish_to: 'none'
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -28,43 +30,50 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  
+  # State Management
+  provider: ^6.1.1
   
   # Text-to-Speech
   flutter_tts: ^4.0.2
   
-  # Local storage
-  shared_preferences: ^2.2.2
-  path_provider: ^2.1.1
+  # Database
   sqflite: ^2.3.0
   
-  # Image handling
+  # Storage
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  
+  # Utilities
+  uuid: ^4.2.1
+  
+  # JSON Serialization
+  json_annotation: ^4.8.1
+  
+  # Image Handling
   image_picker: ^1.0.7
   cached_network_image: ^3.3.1
   
-  # File operations
-  path: ^1.8.3
-  file_picker: ^8.1.4
-  
-  # State management
-  provider: ^6.1.1
-  
-  # JSON serialization
-  json_annotation: ^4.8.1
-  
-  # Internationalization
-  intl: ^0.19.0
-  
-  # Export/Share
+  # Sharing/Export
   share_plus: ^7.2.1
-  
-  # UUID generation
-  uuid: ^4.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  
+  # JSON Code Generation
   build_runner: ^2.4.7
   json_serializable: ^6.7.1
 
@@ -74,11 +83,15 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
   uses-material-design: true
 
-  assets:
-    - assets/images/
-    - assets/icons/
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

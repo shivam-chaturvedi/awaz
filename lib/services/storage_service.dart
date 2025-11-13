@@ -1,43 +1,32 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/vocabulary_item.dart';
 import '../models/app_settings.dart';
 import '../models/usage_log.dart';
-
-// Import database libraries - these will be stubbed on web
-import 'package:sqflite/sqflite.dart' if (dart.library.html) 'package:awaz/services/database_stub.dart';
-import 'package:path/path.dart' if (dart.library.html) 'package:awaz/services/path_stub.dart';
-import 'package:path_provider/path_provider.dart' if (dart.library.html) 'package:awaz/services/path_provider_stub.dart';
 
 class StorageService {
   static final StorageService _instance = StorageService._internal();
   factory StorageService() => _instance;
   StorageService._internal();
 
-  dynamic _database; // Use dynamic to avoid type issues on web
+  Database? _database;
   SharedPreferences? _prefs;
-  bool get _isWeb => kIsWeb;
-  bool _useDatabase = false;
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    if (!_isWeb) {
-      try {
-        await _initDatabase();
-        _useDatabase = true;
-      } catch (e) {
-        debugPrint('Database initialization failed, using SharedPreferences: $e');
-        _useDatabase = false;
-      }
+    try {
+      await _initDatabase();
+    } catch (e) {
+      debugPrint('Database initialization failed: $e');
     }
   }
 
   Future<void> _initDatabase() async {
-    if (_isWeb) return;
-    
     try {
-      // These will only compile on non-web platforms
       final documentsDirectory = await getApplicationDocumentsDirectory();
       final dbPath = join(documentsDirectory.path, 'awaz_database.db');
 
@@ -45,7 +34,6 @@ class StorageService {
         dbPath,
         version: 1,
         onCreate: (db, version) async {
-          if (_isWeb) return; // Skip on web
           // Vocabulary items table
           await db.execute('''
             CREATE TABLE vocabulary_items (
@@ -91,16 +79,37 @@ class StorageService {
 
   // Vocabulary Items
   Future<void> saveVocabularyItem(VocabularyItem item) async {
-    if (_isWeb || !_useDatabase) {
-      await _saveVocabularyItemWeb(item);
-    } else {
-      await _saveVocabularyItemMobile(item);
-    }
-  }
-
-  Future<void> _saveVocabularyItemWeb(VocabularyItem item) async {
-    if (_prefs == null) await initialize();
+    if (_database == null) await initialize();
     
+    if (_database != null) {
+      try {
+        await _database!.insert(
+          'vocabulary_items',
+          {
+            'id': item.id,
+            'image_path': item.imagePath,
+            'image_url': item.imageUrl,
+            'labels': jsonEncode(item.labels),
+            'category': item.category,
+            'parent_id': item.parentId,
+            'related_word_ids': jsonEncode(item.relatedWordIds),
+            'tap_count': item.tapCount,
+            'last_used': item.lastUsed?.toIso8601String(),
+            'is_favorite': item.isFavorite ? 1 : 0,
+            'color_scheme': item.colorScheme.toString().split('.').last,
+            'grid_position': item.gridPosition,
+            'is_frozen': item.isFrozen ? 1 : 0,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+        return;
+      } catch (e) {
+        debugPrint('Database insert failed, falling back to SharedPreferences: $e');
+      }
+    }
+    
+    // Fallback to SharedPreferences
+    if (_prefs == null) await initialize();
     final items = await getAllVocabularyItems();
     final index = items.indexWhere((i) => i.id == item.id);
     
@@ -114,65 +123,25 @@ class StorageService {
     await _prefs!.setString('vocabulary_items', jsonEncode(itemsJson));
   }
 
-  Future<void> _saveVocabularyItemMobile(VocabularyItem item) async {
-    if (_database == null) await initialize();
-    if (_database == null) {
-      await _saveVocabularyItemWeb(item);
-      return;
-    }
-    
-    try {
-      await _database.insert(
-        'vocabulary_items',
-        {
-          'id': item.id,
-          'image_path': item.imagePath,
-          'image_url': item.imageUrl,
-          'labels': jsonEncode(item.labels),
-          'category': item.category,
-          'parent_id': item.parentId,
-          'related_word_ids': jsonEncode(item.relatedWordIds),
-          'tap_count': item.tapCount,
-          'last_used': item.lastUsed?.toIso8601String(),
-          'is_favorite': item.isFavorite ? 1 : 0,
-          'color_scheme': item.colorScheme.toString().split('.').last,
-          'grid_position': item.gridPosition,
-          'is_frozen': item.isFrozen ? 1 : 0,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    } catch (e) {
-      debugPrint('Database insert failed, falling back to SharedPreferences: $e');
-      await _saveVocabularyItemWeb(item);
-    }
-  }
-
   Future<List<VocabularyItem>> getAllVocabularyItems() async {
-    if (_isWeb || !_useDatabase) {
-      return await _getAllVocabularyItemsWeb();
-    } else {
-      return await _getAllVocabularyItemsMobile();
-    }
-  }
-
-  Future<List<VocabularyItem>> _getAllVocabularyItemsWeb() async {
-    if (_prefs == null) await initialize();
+    if (_database == null) await initialize();
     
+    if (_database != null) {
+      try {
+        final List<Map<String, dynamic>> maps = await _database!.query('vocabulary_items');
+        return maps.map((map) => _mapToVocabularyItem(map)).toList();
+      } catch (e) {
+        debugPrint('Database query failed, falling back to SharedPreferences: $e');
+      }
+    }
+    
+    // Fallback to SharedPreferences
+    if (_prefs == null) await initialize();
     final itemsJson = _prefs!.getString('vocabulary_items');
     if (itemsJson == null) return [];
     
     final List<dynamic> decoded = jsonDecode(itemsJson);
     return decoded.map((json) => VocabularyItem.fromJson(json as Map<String, dynamic>)).toList();
-  }
-
-  Future<List<VocabularyItem>> _getAllVocabularyItemsMobile() async {
-    if (_database == null) await initialize();
-    if (_database == null) {
-      return await _getAllVocabularyItemsWeb();
-    }
-    
-    final List<Map<String, dynamic>> maps = await _database.query('vocabulary_items');
-    return maps.map((map) => _mapToVocabularyItem(map)).toList();
   }
 
   Future<List<VocabularyItem>> getVocabularyItemsByCategory(String category) async {
@@ -190,27 +159,23 @@ class StorageService {
   }
 
   Future<void> deleteVocabularyItem(String id) async {
-    if (_isWeb || !_useDatabase) {
-      await _deleteVocabularyItemWeb(id);
-    } else {
-      await _deleteVocabularyItemMobile(id);
+    if (_database == null) await initialize();
+    
+    if (_database != null) {
+      try {
+        await _database!.delete('vocabulary_items', where: 'id = ?', whereArgs: [id]);
+        return;
+      } catch (e) {
+        debugPrint('Database delete failed, falling back to SharedPreferences: $e');
+      }
     }
-  }
-
-  Future<void> _deleteVocabularyItemWeb(String id) async {
+    
+    // Fallback to SharedPreferences
+    if (_prefs == null) await initialize();
     final items = await getAllVocabularyItems();
     items.removeWhere((item) => item.id == id);
     final itemsJson = items.map((i) => i.toJson()).toList();
     await _prefs!.setString('vocabulary_items', jsonEncode(itemsJson));
-  }
-
-  Future<void> _deleteVocabularyItemMobile(String id) async {
-    if (_database == null) await initialize();
-    if (_database == null) {
-      await _deleteVocabularyItemWeb(id);
-      return;
-    }
-    await _database.delete('vocabulary_items', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> updateVocabularyItemTapCount(String id, int count) async {
@@ -247,16 +212,29 @@ class StorageService {
 
   // Usage Logs
   Future<void> saveUsageLog(UsageLog log) async {
-    if (_isWeb || !_useDatabase) {
-      await _saveUsageLogWeb(log);
-    } else {
-      await _saveUsageLogMobile(log);
-    }
-  }
-
-  Future<void> _saveUsageLogWeb(UsageLog log) async {
-    if (_prefs == null) await initialize();
+    if (_database == null) await initialize();
     
+    if (_database != null) {
+      try {
+        await _database!.insert(
+          'usage_logs',
+          {
+            'id': log.id,
+            'vocabulary_item_id': log.vocabularyItemId,
+            'timestamp': log.timestamp.toIso8601String(),
+            'language_code': log.languageCode,
+            'sentence': log.sentence,
+            'session_duration': log.sessionDuration?.inMicroseconds,
+          },
+        );
+        return;
+      } catch (e) {
+        debugPrint('Database insert failed for usage log, falling back to SharedPreferences: $e');
+      }
+    }
+    
+    // Fallback to SharedPreferences
+    if (_prefs == null) await initialize();
     final logs = await getUsageLogs();
     logs.add(log);
     
@@ -269,45 +247,50 @@ class StorageService {
     await _prefs!.setString('usage_logs', jsonEncode(logsJson));
   }
 
-  Future<void> _saveUsageLogMobile(UsageLog log) async {
-    if (_database == null) await initialize();
-    if (_database == null) {
-      await _saveUsageLogWeb(log);
-      return;
-    }
-    
-    await _database.insert(
-      'usage_logs',
-      {
-        'id': log.id,
-        'vocabulary_item_id': log.vocabularyItemId,
-        'timestamp': log.timestamp.toIso8601String(),
-        'language_code': log.languageCode,
-        'sentence': log.sentence,
-        'session_duration': log.sessionDuration?.inMicroseconds,
-      },
-    );
-  }
-
   Future<List<UsageLog>> getUsageLogs({
     DateTime? startDate,
     DateTime? endDate,
     String? vocabularyItemId,
   }) async {
-    if (_isWeb || !_useDatabase) {
-      return await _getUsageLogsWeb(startDate: startDate, endDate: endDate, vocabularyItemId: vocabularyItemId);
-    } else {
-      return await _getUsageLogsMobile(startDate: startDate, endDate: endDate, vocabularyItemId: vocabularyItemId);
-    }
-  }
-
-  Future<List<UsageLog>> _getUsageLogsWeb({
-    DateTime? startDate,
-    DateTime? endDate,
-    String? vocabularyItemId,
-  }) async {
-    if (_prefs == null) await initialize();
+    if (_database == null) await initialize();
     
+    if (_database != null) {
+      try {
+        String? where;
+        List<dynamic>? whereArgs;
+
+        if (startDate != null && endDate != null) {
+          where = 'timestamp BETWEEN ? AND ?';
+          whereArgs = [startDate.toIso8601String(), endDate.toIso8601String()];
+        } else if (vocabularyItemId != null) {
+          where = 'vocabulary_item_id = ?';
+          whereArgs = [vocabularyItemId];
+        }
+
+        final List<Map<String, dynamic>> maps = await _database!.query(
+          'usage_logs',
+          where: where,
+          whereArgs: whereArgs,
+          orderBy: 'timestamp DESC',
+        );
+
+        return maps.map((map) => UsageLog(
+          id: map['id'] as String,
+          vocabularyItemId: map['vocabulary_item_id'] as String,
+          timestamp: DateTime.parse(map['timestamp'] as String),
+          languageCode: map['language_code'] as String,
+          sentence: map['sentence'] as String?,
+          sessionDuration: map['session_duration'] != null
+              ? Duration(microseconds: map['session_duration'] as int)
+              : null,
+        )).toList();
+      } catch (e) {
+        debugPrint('Database query failed for usage logs, falling back to SharedPreferences: $e');
+      }
+    }
+    
+    // Fallback to SharedPreferences
+    if (_prefs == null) await initialize();
     final logsJson = _prefs!.getString('usage_logs');
     if (logsJson == null) return [];
     
@@ -327,46 +310,6 @@ class StorageService {
     
     logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return logs;
-  }
-
-  Future<List<UsageLog>> _getUsageLogsMobile({
-    DateTime? startDate,
-    DateTime? endDate,
-    String? vocabularyItemId,
-  }) async {
-    if (_database == null) await initialize();
-    if (_database == null) {
-      return await _getUsageLogsWeb(startDate: startDate, endDate: endDate, vocabularyItemId: vocabularyItemId);
-    }
-    
-    String? where;
-    List<dynamic>? whereArgs;
-
-    if (startDate != null && endDate != null) {
-      where = 'timestamp BETWEEN ? AND ?';
-      whereArgs = [startDate.toIso8601String(), endDate.toIso8601String()];
-    } else if (vocabularyItemId != null) {
-      where = 'vocabulary_item_id = ?';
-      whereArgs = [vocabularyItemId];
-    }
-
-    final List<Map<String, dynamic>> maps = await _database.query(
-      'usage_logs',
-      where: where,
-      whereArgs: whereArgs,
-      orderBy: 'timestamp DESC',
-    );
-
-    return maps.map((map) => UsageLog(
-      id: map['id'] as String,
-      vocabularyItemId: map['vocabulary_item_id'] as String,
-      timestamp: DateTime.parse(map['timestamp'] as String),
-      languageCode: map['language_code'] as String,
-      sentence: map['sentence'] as String?,
-      sessionDuration: map['session_duration'] != null
-          ? Duration(microseconds: map['session_duration'] as int)
-          : null,
-    )).toList();
   }
 
   // App Settings
