@@ -16,8 +16,8 @@ class StorageService {
   Database? _database;
   SharedPreferences? _prefs;
 
-  Future<void> initialize() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<void> initialize() async {  
+    _prefs = await SharedPreferences.getInstance();  
     try {
       await _initDatabase();
     } catch (e) {

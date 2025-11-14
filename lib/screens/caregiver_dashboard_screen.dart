@@ -11,7 +11,6 @@ import '../providers/settings_provider.dart';
 import '../models/vocabulary_item.dart';
 import '../models/app_settings.dart';
 import '../services/storage_service.dart';
-import '../services/tts_service.dart';
 import '../utils/image_helper.dart';
 
 class CaregiverDashboardScreen extends StatefulWidget {
@@ -377,7 +376,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       await file.writeAsString(jsonString);
       
       if (context.mounted) {
-        await Share.shareXFiles([XFile(file.path)]);
+        await Share.shareXFiles([XFile(file.path)], subject: 'Awaz Backup');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data exported successfully')),
         );

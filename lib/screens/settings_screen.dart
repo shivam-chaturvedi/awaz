@@ -51,71 +51,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
 
-          // Icon Size
-          ListTile(
-            title: const Text('Icon Size'),
-            subtitle: Slider(
-              value: settings.iconSize,
-              min: 0.5,
-              max: 2.0,
-              divisions: 15,
-              label: '${(settings.iconSize * 100).toInt()}%',
-              onChanged: (value) {
-                settingsProvider.setIconSize(value);
-              },
-            ),
-          ),
-          const Divider(),
-
-          // Speech Settings
-          ExpansionTile(
-            title: const Text('Speech Settings'),
-            children: [
-              ListTile(
-                title: const Text('Speech Rate'),
-                subtitle: Slider(
-                  value: settings.speechRate,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 20,
-                  label: '${(settings.speechRate * 100).toInt()}%',
-                  onChanged: (value) {
-                    settingsProvider.setSpeechRate(value);
-                  },
-                ),
-              ),
-              ListTile(
-                title: const Text('Speech Pitch'),
-                subtitle: Slider(
-                  value: settings.speechPitch,
-                  min: 0.5,
-                  max: 2.0,
-                  divisions: 15,
-                  label: '${settings.speechPitch.toStringAsFixed(1)}',
-                  onChanged: (value) {
-                    settingsProvider.setSpeechPitch(value);
-                  },
-                ),
-              ),
-            ],
-          ),
-
-          // Display Settings
-          ExpansionTile(
-            title: const Text('Display Settings'),
-            children: [
-              SwitchListTile(
-                title: const Text('Show Text Labels'),
-                value: settings.showTextLabels,
-                onChanged: (value) {
-                  settingsProvider.updateSettings(
-                    settings.copyWith(showTextLabels: value),
-                  );
-                },
-              ),
-            ],
-          ),
-
           // Accessibility Settings
           ExpansionTile(
             title: const Text('Accessibility'),
@@ -137,24 +72,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) {
                   settingsProvider.updateSettings(
                     settings.copyWith(autoSpeak: value),
-                  );
-                },
-              ),
-              SwitchListTile(
-                title: const Text('Screen Reader Support'),
-                value: settings.enableScreenReader,
-                onChanged: (value) {
-                  settingsProvider.updateSettings(
-                    settings.copyWith(enableScreenReader: value),
-                  );
-                },
-              ),
-              SwitchListTile(
-                title: const Text('Switch Access'),
-                value: settings.enableSwitchAccess,
-                onChanged: (value) {
-                  settingsProvider.updateSettings(
-                    settings.copyWith(enableSwitchAccess: value),
                   );
                 },
               ),
@@ -285,5 +202,3 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 }
-
-
