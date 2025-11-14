@@ -144,49 +144,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SettingsProvider settingsProvider,
     AppSettings settings,
   ) {
+    int rows = settings.gridRows;
+    int columns = settings.gridColumns;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Grid Layout'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Rows: ${settings.gridRows}'),
-            Slider(
-              value: settings.gridRows.toDouble(),
-              min: 2,
-              max: 8,
-              divisions: 6,
-              label: '${settings.gridRows}',
-              onChanged: (value) {
-                settingsProvider.setGridLayout(
-                  value.toInt(),
-                  settings.gridColumns,
-                );
-              },
-            ),
-            Text('Columns: ${settings.gridColumns}'),
-            Slider(
-              value: settings.gridColumns.toDouble(),
-              min: 2,
-              max: 8,
-              divisions: 6,
-              label: '${settings.gridColumns}',
-              onChanged: (value) {
-                settingsProvider.setGridLayout(
-                  settings.gridRows,
-                  value.toInt(),
-                );
-              },
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Grid Layout'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Rows: $rows'),
+              Slider(
+                value: rows.toDouble(),
+                min: 2,
+                max: 8,
+                divisions: 6,
+                label: '$rows',
+                onChanged: (value) {
+                  final newRows = value.toInt();
+                  setState(() => rows = newRows);
+                  settingsProvider.setGridLayout(newRows, columns);
+                },
+              ),
+              Text('Columns: $columns'),
+              Slider(
+                value: columns.toDouble(),
+                min: 2,
+                max: 8,
+                divisions: 6,
+                label: '$columns',
+                onChanged: (value) {
+                  final newColumns = value.toInt();
+                  setState(() => columns = newColumns);
+                  settingsProvider.setGridLayout(rows, newColumns);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Done'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Done'),
-          ),
-        ],
       ),
     );
   }
