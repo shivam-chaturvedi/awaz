@@ -14,14 +14,11 @@ import 'services/vocabulary_initializer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize services
   await StorageService().initialize();
   await TTSService().initialize();
   
-  // Initialize default vocabulary
   await VocabularyInitializer.initializeDefaultVocabulary();
   
-  // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

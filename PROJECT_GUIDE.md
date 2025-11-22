@@ -280,3 +280,5 @@ CommunicationScreen
 - **Database errors:** Check Android permissions in AndroidManifest.xml
 - **TTS not working:** Check device language support
 
+
+
