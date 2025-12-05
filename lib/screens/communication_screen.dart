@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/communication_provider.dart';
@@ -8,9 +7,6 @@ import '../models/app_settings.dart';
 import '../widgets/vocabulary_grid_item.dart';
 import '../widgets/frozen_row.dart';
 import '../widgets/sentence_bar.dart';
-import 'keyboard_screen.dart';
-import 'settings_screen.dart';
-import 'caregiver_dashboard_screen.dart';
 
 class CommunicationScreen extends StatefulWidget {
   const CommunicationScreen({super.key});
@@ -42,52 +38,8 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
       builder: (context, communicationProvider, vocabularyProvider, settingsProvider, _) {
         final settings = settingsProvider.settings;
 
-        return Scaffold(
-      appBar: AppBar(
-        title: const Text('Awaz AAC'),
-        actions: [
-          IconButton(
-            icon: Icon(communicationProvider.isKeyboardMode
-                ? Icons.grid_view
-                : Icons.keyboard),
-            onPressed: () {
-              if (communicationProvider.isKeyboardMode) {
-                communicationProvider.setKeyboardMode(false);
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const KeyboardScreen()),
-                );
-              }
-            },
-            tooltip: communicationProvider.isKeyboardMode
-                ? 'Switch to Picture Mode'
-                : 'Switch to Keyboard Mode',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-            tooltip: 'Settings',
-          ),
-          IconButton(
-            icon: const Icon(Icons.dashboard),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CaregiverDashboardScreen()),
-              );
-            },
-            tooltip: 'Caregiver Dashboard',
-          ),
-        ],
-      ),
-      body: Column(
+        return SafeArea(
+      child: Column(
         children: [
           // Sentence bar - always visible and prominent
           Container(
@@ -95,7 +47,7 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
               color: Theme.of(context).colorScheme.primaryContainer,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha(26),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -242,4 +194,3 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
     );
   }
 }
-

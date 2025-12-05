@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import '../models/app_settings.dart';
 import '../services/storage_service.dart';
 import '../services/tts_service.dart';
-import '../utils/color_utils.dart';
 
 class SettingsProvider with ChangeNotifier {
   final StorageService _storageService = StorageService();
@@ -79,5 +78,4 @@ class SettingsProvider with ChangeNotifier {
     await updateSettings(updated);
   }
 }
-
 

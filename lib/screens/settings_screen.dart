@@ -3,27 +3,32 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
-import '../utils/color_utils.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class SettingsTab extends StatefulWidget {
+  const SettingsTab({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final settings = settingsProvider.settings;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
         children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Settings',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 16),
           // Language Selection
           ListTile(
             title: const Text('Language'),

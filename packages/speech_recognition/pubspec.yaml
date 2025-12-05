@@ -1,0 +1,12 @@
+name: speech_recognition
+description: Local speech recognition shim that wraps speech_to_text for this project.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  speech_to_text: ^7.3.0

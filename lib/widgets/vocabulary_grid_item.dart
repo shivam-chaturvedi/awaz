@@ -26,6 +26,7 @@ class VocabularyGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = ColorUtils.getColorForScheme(item.colorScheme);
     final textColor = ColorUtils.getTextColorForScheme(item.colorScheme, isDark);
+    final detailText = item.labels['detail'];
 
     return Material(
       color: Colors.transparent,
@@ -35,8 +36,8 @@ class VocabularyGridItem extends StatelessWidget {
           onTap();
         },
         borderRadius: BorderRadius.circular(12.0),
-        splashColor: Colors.white.withOpacity(0.3),
-        highlightColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withAlpha(77),
+        highlightColor: Colors.white.withAlpha(26),
         child: Container(
           margin: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
@@ -48,7 +49,7 @@ class VocabularyGridItem extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withAlpha(51),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -65,23 +66,41 @@ class VocabularyGridItem extends StatelessWidget {
             ),
             if (showTextLabels)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                  child: Consumer<SettingsProvider>(
-                    builder: (context, settingsProvider, _) {
-                      return Text(
-                        item.getLabel(settingsProvider.settings.currentLanguage),
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 12 * iconSize,
-                          fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                child: Consumer<SettingsProvider>(
+                  builder: (context, settingsProvider, _) {
+                    return Column(
+                      children: [
+                        Text(
+                          item.getLabel(settingsProvider.settings.currentLanguage),
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12 * iconSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      );
-                    },
-                  ),
+                        if ((detailText ?? '').isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text(
+                              detailText!,
+                              style: TextStyle(
+                                color: textColor.withAlpha(217),
+                                fontSize: 9 * iconSize,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
+              ),
           ],
         ),
         ),
@@ -152,4 +171,3 @@ class VocabularyGridItem extends StatelessWidget {
     }
   }
 }
-

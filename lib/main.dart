@@ -6,9 +6,8 @@ import 'providers/settings_provider.dart';
 import 'providers/communication_provider.dart';
 import 'services/storage_service.dart';
 import 'services/tts_service.dart';
-import 'screens/communication_screen.dart';
+import 'screens/home_screen.dart';
 import 'utils/color_utils.dart';
-import 'models/app_settings.dart';
 import 'services/vocabulary_initializer.dart';
 
 void main() async {
@@ -62,7 +61,7 @@ class AwazApp extends StatelessWidget {
             title: 'Awaz AAC',
             debugShowCheckedModeBanner: false,
             theme: theme,
-            home: const CommunicationScreen(),
+            home: const AwazHomeScreen(),
             // Enable accessibility
             builder: (context, child) {
               return MediaQuery(

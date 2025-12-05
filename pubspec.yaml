@@ -61,6 +61,9 @@ dependencies:
   
   # Sharing/Export
   share_plus: ^7.2.1
+  translator: ^1.0.4+1
+  speech_recognition:
+    path: packages/speech_recognition
 
 dev_dependencies:
   flutter_test:

@@ -48,6 +48,9 @@ class TTSService {
       'mr': 'mr-IN', // Marathi
       'bn': 'bn-IN', // Bengali
       'gu': 'gu-IN', // Gujarati
+      'es': 'es-ES', // Spanish
+      'de': 'de-DE', // German
+      'fr': 'fr-FR', // French
     };
     
     return languageMap[languageCode] ?? 'en-US';
@@ -93,5 +96,4 @@ class TTSService {
 
   String get currentLanguage => _currentLanguage;
 }
-
 

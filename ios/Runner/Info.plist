@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is required to transcribe voice input.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required when uploading photos for custom vocabulary tiles.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is needed to select custom images.</string>
 </dict>
 </plist>
