@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/vocabulary_item.dart';
 import '../models/usage_log.dart';
 import '../services/storage_service.dart';
+import '../services/translation_service.dart';
 import '../services/tts_service.dart';
 import 'vocabulary_provider.dart';
 import 'settings_provider.dart';
@@ -39,14 +40,31 @@ class CommunicationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addWordToSentence(VocabularyItem item) {
+  Future<void> addWordToSentence(VocabularyItem item) async {
     debugPrint('addWordToSentence called with item: ${item.id}');
     debugPrint('Current sentence length before: ${_currentSentence.length}');
-    
-    _currentSentence = [..._currentSentence, item];
+    final languageCode = _settingsProvider?.settings.currentLanguage ?? 'en';
+    var localizedItem = item;
+
+    if (languageCode != 'en') {
+      try {
+        final baseText = item.labels['en'] ?? item.labels.values.first;
+        final translatedText = await TranslationService().translate(
+          text: baseText,
+          targetLanguage: languageCode,
+        );
+        localizedItem = item.copyWith(
+          labels: {...item.labels, languageCode: translatedText},
+        );
+      } catch (e) {
+        debugPrint('Translation failed in sentence builder: $e');
+      }
+    }
+
+    _currentSentence = [..._currentSentence, localizedItem];
     
     // Debug: Print added word
-    debugPrint('Added word: ${item.getLabel(_settingsProvider?.settings.currentLanguage ?? 'en')}, Total: ${_currentSentence.length}');
+    debugPrint('Added word: ${localizedItem.getLabel(languageCode)}, Total: ${_currentSentence.length}');
     debugPrint('Notifying listeners...');
     
     // Immediately notify listeners
@@ -128,4 +146,3 @@ class CommunicationProvider with ChangeNotifier {
     await _ttsService.speak(text);
   }
 }
-

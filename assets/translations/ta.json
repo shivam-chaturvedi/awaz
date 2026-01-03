@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "தொடர்பு",
+        "speak": "பேசு",
+        "keyboard": "விசைப்பலகை",
+        "custom": "தனிப்பயன்",
+        "settings": "அமைப்புகள்"
+    },
+    "settings": {
+        "title": "அமைப்புகள்",
+        "language": "மொழி",
+        "theme": "தீம்",
+        "grid_layout": "கிரிட் லேஅவுட்",
+        "accessibility": "அணுகல்தன்மை",
+        "frozen_row": "உறைந்த வரிசை",
+        "frozen_row_desc": "அடிக்கடி பயன்படுத்தப்படும் சொற்களை காணக்கூடியதாக வைத்திருங்கள்",
+        "auto_speak": "தானியங்கு பேச்சு",
+        "auto_speak_desc": "தேர்ந்தெடுக்கப்பட்ட சொற்களை தானாகவே பேசுங்கள்",
+        "theme_light": "ஒளி",
+        "theme_dark": "இருள்",
+        "theme_high_contrast": "உயர் மாறுபாடு",
+        "done": "முடிந்தது"
+    },
+    "speak": {
+        "title": "பேசு",
+        "subtitle": "நான்கு எளிய படிகளில் உங்கள் குரலை மற்றொரு மொழியில் மொழிபெயர்க்கவும்.",
+        "header_title": "குரல் முதல் பன்மொழி வரை",
+        "header_subtitle": "எந்த மொழியிலும் பேசுங்கள் · மற்றொன்றில் கேளுங்கள்",
+        "step1_title": "உங்கள் குரலை பதிவு செய்யுங்கள்",
+        "step1_button": "பதிவு செய்ய தட்டவும்",
+        "step1_listening": "கேட்கிறது...",
+        "step1_status_ready": "பேசத் தொடங்க மைக்கை தட்டவும்",
+        "step1_status_unavailable": "மைக்ரோஃபோன் கிடைக்கவில்லை",
+        "step2_title": "உங்கள் உரை",
+        "step2_placeholder": "நீங்கள் சொன்னது இங்கே தோன்றும்.",
+        "step2_button": "படியெடுத்து மொழிபெயர்க்கவும்",
+        "step2_translating": "மொழிபெயர்க்கிறது...",
+        "step2_clear": "அழி",
+        "step3_title": "வெளியீட்டு மொழியைத் தேர்ந்தெடுக்கவும்",
+        "step4_title": "ஆடியோவை இயக்கவும்",
+        "step4_placeholder": "மொழிபெயர்க்கப்பட்ட உரை இங்கே தோன்றும்.",
+        "step4_button_play": "{} ஆடியோவை இயக்கவும்",
+        "step4_button_playing": "{} ஆடியோ இயங்குகிறது",
+        "error_translation": "மொழிபெயர்ப்பு தோல்வியடைந்தது",
+        "error_audio": "ஆடியோவை இயக்க முடியவில்லை",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "தொடர்பு",
+        "added": "சேர்க்கப்பட்டது"
+    },
+    "keyboard": {
+        "title": "விசைப்பலகை"
+    },
+    "custom_vocabulary": {
+        "title": "தனிப்பயன் சொற்களஞ்சியம்",
+        "current_language": "தற்போதைய மொழி"
+    },
+    "caregiver_dashboard": {
+        "title": "பராமரிப்பாளர் டாஷ்போர்டு"
+    }
+}

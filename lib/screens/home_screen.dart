@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/communication_provider.dart';
 import 'communication_screen.dart';
 import 'custom_vocabulary_screen.dart';
@@ -18,29 +19,29 @@ class AwazHomeScreen extends StatefulWidget {
 class _AwazHomeScreenState extends State<AwazHomeScreen> {
   int _currentIndex = 0;
 
-  static const _tabTitles = [
-    'Communicate',
-    'Speak',
-    'Custom Library',
-    'Settings',
-  ];
+  List<String> get _tabTitles => [
+        translate('tabs.communicate'),
+        translate('tabs.speak'),
+        translate('tabs.custom'),
+        translate('tabs.settings'),
+      ];
 
-  static const _navItems = [
+  List<BottomNavigationBarItem> get _navItems => [
     BottomNavigationBarItem(
-      icon: Icon(Icons.chat_bubble_outline),
-      label: 'Communicate',
+      icon: const Icon(Icons.chat_bubble_outline),
+      label: translate('tabs.communicate'),
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.mic),
-      label: 'Speak',
+      icon: const Icon(Icons.mic),
+      label: translate('tabs.speak'),
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.add_photo_alternate_outlined),
-      label: 'Create',
+      icon: const Icon(Icons.add_photo_alternate_outlined),
+      label: translate('tabs.custom'),
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.settings_outlined),
-      label: 'Settings',
+      icon: const Icon(Icons.settings_outlined),
+      label: translate('tabs.settings'),
     ),
   ];
 
@@ -89,7 +90,7 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
       builder: (context, communicationProvider, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Awaz AAC • ${_tabTitles[_validIndex]}'),
+            title: Text('${translate('app_name')} • ${_tabTitles[_validIndex]}'),
             actions: [
               if (_currentIndex == 0)
                 IconButton(

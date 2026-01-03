@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "વાતચીત",
+        "speak": "બોલો",
+        "keyboard": "કીબોર્ડ",
+        "custom": "કસ્ટમ",
+        "settings": "સેટિંગ્સ"
+    },
+    "settings": {
+        "title": "સેટિંગ્સ",
+        "language": "ભાષા",
+        "theme": "થીમ",
+        "grid_layout": "ગ્રિડ લેઆઉટ",
+        "accessibility": "ઍક્સેસિબિલિટી",
+        "frozen_row": "ફ્રોઝન રો",
+        "frozen_row_desc": "વારંવાર વપરાતા શબ્દોને દૃશ્યમાન રાખો",
+        "auto_speak": "ઑટો સ્પીક",
+        "auto_speak_desc": "પસંદ કરેલા શબ્દોને આપમેળે બોલો",
+        "theme_light": "લાઇટ",
+        "theme_dark": "ડાર્ક",
+        "theme_high_contrast": "હાઇ કોન્ટ્રાસ્ટ",
+        "done": "થઈ ગયું"
+    },
+    "speak": {
+        "title": "બોલો",
+        "subtitle": "ચાર સરળ પગલાંમાં તમારા અવાજને બીજી ભાષામાં અનુવાદ કરો.",
+        "header_title": "વૉઇસ ટુ મલ્ટીલિંગ્વલ",
+        "header_subtitle": "કોઈપણ ભાષામાં બોલો · બીજામાં સાંભળો",
+        "step1_title": "તમારો અવાજ રેકોર્ડ કરો",
+        "step1_button": "રેકોર્ડ કરવા માટે ટૅપ કરો",
+        "step1_listening": "સાંભળી રહ્યું છે...",
+        "step1_status_ready": "બોલવાનું શરૂ કરવા માટે માઇક ટૅપ કરો",
+        "step1_status_unavailable": "માઇક્રોફોન ઉપલબ્ધ નથી",
+        "step2_title": "તમારું ટેક્સ્ટ",
+        "step2_placeholder": "તમે જે કહ્યું તે અહીં દેખાશે.",
+        "step2_button": "ટ્રાન્સક્રાઇબ અને અનુવાદ કરો",
+        "step2_translating": "અનુવાદ કરી રહ્યું છે...",
+        "step2_clear": "સાફ કરો",
+        "step3_title": "આઉટપુટ ભાષા પસંદ કરો",
+        "step4_title": "ઑડિયો ચલાવો",
+        "step4_placeholder": "અનુવાદિત ટેક્સ્ટ અહીં દેખાશે.",
+        "step4_button_play": "{} ઑડિયો ચલાવો",
+        "step4_button_playing": "{} ઑડિયો ચાલી રહ્યું છે",
+        "error_translation": "અનુવાદ નિષ્ફળ થયો",
+        "error_audio": "ઑડિયો ચલાવવામાં અસમર્થ",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "વાતચીત",
+        "added": "ઉમેર્યું"
+    },
+    "keyboard": {
+        "title": "કીબોર્ડ"
+    },
+    "custom_vocabulary": {
+        "title": "કસ્ટમ શબ્દભંડોળ",
+        "current_language": "વર્તમાન ભાષા"
+    },
+    "caregiver_dashboard": {
+        "title": "કેરગિવર ડેશબોર્ડ"
+    }
+}

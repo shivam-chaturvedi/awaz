@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/settings_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
@@ -21,17 +22,17 @@ class _SettingsTabState extends State<SettingsTab> {
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              translate('settings.title'),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 16),
           // Language Selection
           ListTile(
-            title: const Text('Language'),
+            title: Text(translate('settings.language')),
             subtitle: Text(LanguageUtils.getLanguageName(settings.currentLanguage)),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showLanguageDialog(settingsProvider),
@@ -40,7 +41,7 @@ class _SettingsTabState extends State<SettingsTab> {
 
           // Theme Selection
           ListTile(
-            title: const Text('Theme'),
+            title: Text(translate('settings.theme')),
             subtitle: Text(_getThemeName(settings.themeMode)),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showThemeDialog(settingsProvider),
@@ -49,7 +50,7 @@ class _SettingsTabState extends State<SettingsTab> {
 
           // Grid Layout
           ListTile(
-            title: const Text('Grid Layout'),
+            title: Text(translate('settings.grid_layout')),
             subtitle: Text('${settings.gridRows} x ${settings.gridColumns}'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showGridLayoutDialog(settingsProvider, settings),
@@ -58,11 +59,11 @@ class _SettingsTabState extends State<SettingsTab> {
 
           // Accessibility Settings
           ExpansionTile(
-            title: const Text('Accessibility'),
+            title: Text(translate('settings.accessibility')),
             children: [
               SwitchListTile(
-                title: const Text('Frozen Row'),
-                subtitle: const Text('Keep frequently used words visible'),
+                title: Text(translate('settings.frozen_row')),
+                subtitle: Text(translate('settings.frozen_row_desc')),
                 value: settings.enableFrozenRow,
                 onChanged: (value) {
                   settingsProvider.updateSettings(
@@ -71,8 +72,8 @@ class _SettingsTabState extends State<SettingsTab> {
                 },
               ),
               SwitchListTile(
-                title: const Text('Auto Speak'),
-                subtitle: const Text('Automatically speak selected words'),
+                title: Text(translate('settings.auto_speak')),
+                subtitle: Text(translate('settings.auto_speak_desc')),
                 value: settings.autoSpeak,
                 onChanged: (value) {
                   settingsProvider.updateSettings(
@@ -91,15 +92,16 @@ class _SettingsTabState extends State<SettingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(translate('settings.language')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: LanguageUtils.supportedLanguages.map((langCode) {
               return ListTile(
                 title: Text(LanguageUtils.getLanguageName(langCode)),
-                onTap: () {
-                  settingsProvider.setLanguage(langCode);
+                onTap: () async {
+                  await changeLocale(context, langCode);
+                  await settingsProvider.setLanguage(langCode);
                   Navigator.pop(context);
                 },
               );
@@ -114,28 +116,21 @@ class _SettingsTabState extends State<SettingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Theme'),
+        title: Text(translate('settings.theme')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Light'),
+            children: [
+              ListTile(
+              title: Text(translate('settings.theme_light')),
               onTap: () {
                 settingsProvider.setThemeMode(AppThemeMode.light);
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              title: const Text('Dark'),
+              ListTile(
+                title: Text(translate('settings.theme_dark')),
               onTap: () {
                 settingsProvider.setThemeMode(AppThemeMode.dark);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('High Contrast'),
-              onTap: () {
-                settingsProvider.setThemeMode(AppThemeMode.highContrast);
                 Navigator.pop(context);
               },
             ),
@@ -155,10 +150,12 @@ class _SettingsTabState extends State<SettingsTab> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Grid Layout'),
+          title: Text(translate('settings.grid_layout')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              GridLayoutPreview(rows: rows, columns: columns),
+              const SizedBox(height: 8),
               Text('Rows: $rows'),
               Slider(
                 value: rows.toDouble(),
@@ -176,8 +173,8 @@ class _SettingsTabState extends State<SettingsTab> {
               Slider(
                 value: columns.toDouble(),
                 min: 2,
-                max: 8,
-                divisions: 6,
+                max: 4,
+                divisions: 2,
                 label: '$columns',
                 onChanged: (value) {
                   final newColumns = value.toInt();
@@ -190,7 +187,7 @@ class _SettingsTabState extends State<SettingsTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Done'),
+              child: Text(translate('settings.done')),
             ),
           ],
         ),
@@ -201,11 +198,72 @@ class _SettingsTabState extends State<SettingsTab> {
   String _getThemeName(AppThemeMode mode) {
     switch (mode) {
       case AppThemeMode.light:
-        return 'Light';
+        return translate('settings.theme_light');
       case AppThemeMode.dark:
-        return 'Dark';
+        return translate('settings.theme_dark');
       case AppThemeMode.highContrast:
-        return 'High Contrast';
+        return translate('settings.theme_high_contrast');
     }
+  }
+}
+
+class GridLayoutPreview extends StatelessWidget {
+  final int rows;
+  final int columns;
+
+  const GridLayoutPreview({
+    super.key,
+    required this.rows,
+    required this.columns,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final previewRows = rows.clamp(1, 6) as int;
+    final previewColumns = columns.clamp(1, 4) as int;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          translate('settings.grid_layout_preview'),
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.dividerColor.withOpacity(0.6),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(previewRows, (rowIndex) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                child: Row(
+                  children: List.generate(previewColumns, (columnIndex) {
+                    return Expanded(
+                      child: Container(
+                        height: 22,
+                        margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
   }
 }

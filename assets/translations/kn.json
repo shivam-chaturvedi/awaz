@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "ಸಂವಹನ",
+        "speak": "ಮಾತನಾಡು",
+        "keyboard": "ಕೀಬೋರ್ಡ್",
+        "custom": "ಕಸ್ಟಮ್",
+        "settings": "ಸೆಟ್ಟಿಂಗ್ಗಳು"
+    },
+    "settings": {
+        "title": "ಸೆಟ್ಟಿಂಗ್ಗಳು",
+        "language": "ಭಾಷೆ",
+        "theme": "ಥೀಮ್",
+        "grid_layout": "ಗ್ರಿಡ್ ಲೇಔಟ್",
+        "accessibility": "ಪ್ರವೇಶ",
+        "frozen_row": "ಫ್ರೋಜನ್ ರೋ",
+        "frozen_row_desc": "ಆಗಾಗ್ಗೆ ಬಳಸುವ ಪದಗಳನ್ನು ಗೋಚರವಾಗಿರಿಸಿ",
+        "auto_speak": "ಆಟೋ ಸ್ಪೀಕ್",
+        "auto_speak_desc": "ಆಯ್ಕೆಮಾಡಿದ ಪದಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮಾತನಾಡಿ",
+        "theme_light": "ಲೈಟ್",
+        "theme_dark": "ಡಾರ್ಕ್",
+        "theme_high_contrast": "ಹೈ ಕಾಂಟ್ರಾಸ್ಟ್",
+        "done": "ಮುಗಿದಿದೆ"
+    },
+    "speak": {
+        "title": "ಮಾತನಾಡು",
+        "subtitle": "ನಾಲ್ಕು ಸರಳ ಹಂತಗಳಲ್ಲಿ ನಿಮ್ಮ ಧ್ವನಿಯನ್ನು ಮತ್ತೊಂದು ಭಾಷೆಗೆ ಅನುವಾದಿಸಿ.",
+        "header_title": "ವಾಯ್ಸ್ ಟು ಮಲ್ಟಿಲಿಂಗ್ವಲ್",
+        "header_subtitle": "ಯಾವುದೇ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಿ · ಇನ್ನೊಂದರಲ್ಲಿ ಕೇಳಿ",
+        "step1_title": "ನಿಮ್ಮ ಧ್ವನಿಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ",
+        "step1_button": "ರೆಕಾರ್ಡ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+        "step1_listening": "ಕೇಳುತ್ತಿದೆ...",
+        "step1_status_ready": "ಮಾತನಾಡಲು ಪ್ರಾರಂಭಿಸಲು ಮೈಕ್ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ",
+        "step1_status_unavailable": "ಮೈಕ್ರೊಫೋನ್ ಲಭ್ಯವಿಲ್ಲ",
+        "step2_title": "ನಿಮ್ಮ ಪಠ್ಯ",
+        "step2_placeholder": "ನೀವು ಹೇಳಿದ್ದು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
+        "step2_button": "ಟ್ರಾನ್ಸ್‌ಕ್ರೈಬ್ & ಟ್ರಾನ್ಸ್‌ಲೇಟ್",
+        "step2_translating": "ಅನುವಾದಿಸುತ್ತಿದೆ...",
+        "step2_clear": "ಕ್ಲಿಯರ್",
+        "step3_title": "ಔಟ್‌ಪುಟ್ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+        "step4_title": "ಆಡಿಯೋ ಪ್ಲೇ ಮಾಡಿ",
+        "step4_placeholder": "ಅನುವಾದಿತ ಪಠ್ಯ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
+        "step4_button_play": "{} ಆಡಿಯೋ ಪ್ಲೇ ಮಾಡಿ",
+        "step4_button_playing": "{} ಆಡಿಯೋ ಪ್ಲೇ ಆಗುತ್ತಿದೆ",
+        "error_translation": "ಅನುವಾದ ವಿಫಲವಾಗಿದೆ",
+        "error_audio": "ಆಡಿಯೋ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "ಸಂವಹನ",
+        "added": "ಸೇರಿಸಲಾಗಿದೆ"
+    },
+    "keyboard": {
+        "title": "ಕೀಬೋರ್ಡ್"
+    },
+    "custom_vocabulary": {
+        "title": "ಕಸ್ಟಮ್ ಶಬ್ದಕೋಶ",
+        "current_language": "ಪ್ರಸ್ತುತ ಭಾಷೆ"
+    },
+    "caregiver_dashboard": {
+        "title": "ಕೇರ್‌ಗಿವರ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್"
+    }
+}

@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "కమ్యూనికేట్",
+        "speak": "మాట్లాడు",
+        "keyboard": "కీబోర్డ్",
+        "custom": "కస్టమ్",
+        "settings": "సెట్టింగ్స్"
+    },
+    "settings": {
+        "title": "సెట్టింగ్స్",
+        "language": "భాష",
+        "theme": "థీమ్",
+        "grid_layout": "గ్రిడ్ లేఅవుట్",
+        "accessibility": "యాక్సెసిబిలిటీ",
+        "frozen_row": "ఫ్రోజెన్ రో",
+        "frozen_row_desc": "తరచుగా ఉపయోగించే పదాలను కనిపించేలా ఉంచండి",
+        "auto_speak": "ఆటో స్పీక్",
+        "auto_speak_desc": "ఎంచుకున్న పదాలను స్వయంచాలకంగా మాట్లాడండి",
+        "theme_light": "లైట్",
+        "theme_dark": "డార్క్",
+        "theme_high_contrast": "హై కాంట్రాస్ట్",
+        "done": "పూర్తయింది"
+    },
+    "speak": {
+        "title": "మాట్లాడు",
+        "subtitle": "నాలుగు సాధారణ దశల్లో మీ వాయిస్‌ను మరొక భాషలోకి అనువదించండి.",
+        "header_title": "వాయిస్ టు మల్టీలింగ్వల్",
+        "header_subtitle": "ఏ భాషలోనైనా మాట్లాడండి · మరొకదానిలో వినండి",
+        "step1_title": "మీ వాయిస్‌ను రికార్డ్ చేయండి",
+        "step1_button": "రికార్డ్ చేయడానికి ట్యాప్ చేయండి",
+        "step1_listening": "వింటోంది...",
+        "step1_status_ready": "మాట్లాడటం ప్రారంభించడానికి మైక్‌ను ట్యాప్ చేయండి",
+        "step1_status_unavailable": "మైక్రోఫోన్ అందుబాటులో లేదు",
+        "step2_title": "మీ టెక్స్ట్",
+        "step2_placeholder": "మీరు చెప్పినది ఇక్కడ కనిపిస్తుంది.",
+        "step2_button": "ట్రాన్స్‌క్రైబ్ & ట్రాన్స్‌లేట్",
+        "step2_translating": "అనువదిస్తోంది...",
+        "step2_clear": "క్లియర్",
+        "step3_title": "అవుట్‌పుట్ భాషను ఎంచుకోండి",
+        "step4_title": "ఆడియో ప్లే చేయండి",
+        "step4_placeholder": "అనువదించిన టెక్స్ట్ ఇక్కడ కనిపిస్తుంది.",
+        "step4_button_play": "{} ఆడియో ప్లే చేయండి",
+        "step4_button_playing": "{} ఆడియో ప్లే అవుతోంది",
+        "error_translation": "అనువాదం విఫలమైంది",
+        "error_audio": "ఆడియో ప్లే చేయడం సాధ్యం కాలేదు",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "కమ్యూనికేషన్",
+        "added": "జోడించబడింది"
+    },
+    "keyboard": {
+        "title": "కీబోర్డ్"
+    },
+    "custom_vocabulary": {
+        "title": "కస్టమ్ వొకాబులరీ",
+        "current_language": "ప్రస్తుత భాష"
+    },
+    "caregiver_dashboard": {
+        "title": "కేర్‌గివర్ డాష్‌బోర్డ్"
+    }
+}

@@ -1,0 +1,68 @@
+{
+  "app_name": "Awaz AAC",
+  "tabs": {
+    "communicate": "Communicate",
+    "speak": "Speak",
+    "keyboard": "Keyboard",
+    "custom": "Custom",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "grid_layout": "Grid Layout",
+    "grid_layout_preview": "Grid layout preview",
+    "accessibility": "Accessibility",
+    "frozen_row": "Frozen Row",
+    "frozen_row_desc": "Keep frequently used words visible",
+    "auto_speak": "Auto Speak",
+    "auto_speak_desc": "Automatically speak selected words",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_high_contrast": "High Contrast",
+    "done": "Done"
+  },
+  "speak": {
+    "title": "Speak",
+    "subtitle": "Translate your voice into another language in four simple steps.",
+    "header_title": "Voice to Multilingual",
+    "header_subtitle": "Speak in any language · Hear in another",
+    "step1_title": "Record Your Voice",
+    "step1_button": "Tap to Record",
+    "step1_listening": "Listening...",
+    "step1_status_ready": "Tap the mic to start speaking",
+    "step1_status_unavailable": "Microphone unavailable",
+    "step2_title": "Your Text",
+    "step2_placeholder": "What you said appears here.",
+    "step2_button": "Transcribe & Translate",
+    "step2_translating": "Translating...",
+    "step2_clear": "Clear",
+    "step3_title": "Choose Output Language",
+    "step4_title": "Play Audio",
+    "step4_placeholder": "Translated text will appear here.",
+    "step4_button_play": "Play {} Audio",
+    "step4_button_playing": "Playing {} audio",
+    "error_translation": "Translation failed",
+    "error_audio": "Unable to play audio",
+    "manual_input_title": "Type or paste text",
+    "manual_input_hint": "Enter text to convert",
+    "manual_input_button": "Convert text",
+    "manual_input_clear": "Clear",
+    "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+  },
+  "communication": {
+    "title": "Communication",
+    "added": "Added"
+  },
+  "keyboard": {
+    "title": "Keyboard"
+  },
+  "custom_vocabulary": {
+    "title": "Custom Vocabulary",
+    "current_language": "Current language"
+  },
+  "caregiver_dashboard": {
+    "title": "Caregiver Dashboard"
+  }
+}

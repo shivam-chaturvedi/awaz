@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "ആശയവിനിമയം",
+        "speak": "സംസാരിക്കുക",
+        "keyboard": "കീബോർഡ്",
+        "custom": "കസ്റ്റം",
+        "settings": "ക്രമീകരണങ്ങൾ"
+    },
+    "settings": {
+        "title": "ക്രമീകരണങ്ങൾ",
+        "language": "ഭാഷ",
+        "theme": "തീം",
+        "grid_layout": "ഗ്രിഡ് ലേഔട്ട്",
+        "accessibility": "ആക്സസിബിലിറ്റി",
+        "frozen_row": "ഫ്രോസൺ റോ",
+        "frozen_row_desc": "പതിവായി ഉപയോഗിക്കുന്ന വാക്കുകൾ ദൃശ്യമാക്കുക",
+        "auto_speak": "ഓട്ടോ സ്പീക്ക്",
+        "auto_speak_desc": "തിരഞ്ഞെടുത്ത വാക്കുകൾ സ്വയമേവ സംസാരിക്കുക",
+        "theme_light": "ലൈറ്റ്",
+        "theme_dark": "ഡാർക്ക്",
+        "theme_high_contrast": "ഹൈ കോൺട്രാസ്റ്റ്",
+        "done": "പൂർത്തിയായി"
+    },
+    "speak": {
+        "title": "സംസാരിക്കുക",
+        "subtitle": "നാല് ലളിതമായ ഘട്ടങ്ങളിൽ നിങ്ങളുടെ ശബ്ദം മറ്റൊരു ഭാഷയിലേക്ക് വിവർത്തനം ചെയ്യുക.",
+        "header_title": "വോയ്സ് ടു മൾട്ടിലിംഗ്വൽ",
+        "header_subtitle": "ഏത് ഭാഷയിലും സംസാരിക്കുക · മറ്റൊന്നിൽ കേൾക്കുക",
+        "step1_title": "നിങ്ങളുടെ ശബ്ദം റെക്കോർഡ് ചെയ്യുക",
+        "step1_button": "റെക്കോർഡ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക",
+        "step1_listening": "കേൾക്കുന്നു...",
+        "step1_status_ready": "സംസാരിക്കാൻ തുടങ്ങാൻ മൈക്ക് ടാപ്പ് ചെയ്യുക",
+        "step1_status_unavailable": "മൈക്രോഫോൺ ലഭ്യമല്ല",
+        "step2_title": "നിങ്ങളുടെ ടെക്സ്റ്റ്",
+        "step2_placeholder": "നിങ്ങൾ പറഞ്ഞത് ഇവിടെ ദൃശ്യമാകും.",
+        "step2_button": "ട്രാൻസ്ക്രൈബ് & ട്രാൻസ്ലേറ്റ്",
+        "step2_translating": "വിവർത്തനം ചെയ്യുന്നു...",
+        "step2_clear": "മായ്ക്കുക",
+        "step3_title": "ഔട്ട്പുട്ട് ഭാഷ തിരഞ്ഞെടുക്കുക",
+        "step4_title": "ഓഡിയോ പ്ലേ ചെയ്യുക",
+        "step4_placeholder": "വിവർത്തനം ചെയ്ത ടെക്സ്റ്റ് ഇവിടെ ദൃശ്യമാകും.",
+        "step4_button_play": "{} ഓഡിയോ പ്ലേ ചെയ്യുക",
+        "step4_button_playing": "{} ഓഡിയോ പ്ലേ ചെയ്യുന്നു",
+        "error_translation": "വിവർത്തനം പരാജയപ്പെട്ടു",
+        "error_audio": "ഓഡിയോ പ്ലേ ചെയ്യാൻ കഴിഞ്ഞില്ല",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "ആശയവിനിമയം",
+        "added": "ചേർത്തു"
+    },
+    "keyboard": {
+        "title": "കീബോർഡ്"
+    },
+    "custom_vocabulary": {
+        "title": "കസ്റ്റം പദാവലി",
+        "current_language": "നിലവിലെ ഭാഷ"
+    },
+    "caregiver_dashboard": {
+        "title": "കെയർഗിവർ ഡാഷ്ബോർഡ്"
+    }
+}

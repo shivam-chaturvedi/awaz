@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/vocabulary_provider.dart';
@@ -82,7 +84,6 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
     AppSettings settings,
   ) {
     final items = vocabularyProvider.vocabularyItems;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (items.isEmpty) {
       return Center(
@@ -102,41 +103,66 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(8.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: settings.gridColumns,
-        childAspectRatio: 1.0,
-        crossAxisSpacing: 8.0,
-        mainAxisSpacing: 8.0,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return VocabularyGridItem(
-          item: item,
-          iconSize: settings.iconSize,
-          showTextLabels: settings.showTextLabels,
-          isDark: isDark,
-          onTap: () {
-            // Debug: Verify provider and item
-            debugPrint('Tapped item: ${item.getLabel(settings.currentLanguage)}');
-            debugPrint('Current sentence before: ${communicationProvider.currentSentence.length}');
-            
-            // Add word to sentence
-            communicationProvider.addWordToSentence(item);
-            
-            // Debug: Verify after adding
-            debugPrint('Current sentence after: ${communicationProvider.currentSentence.length}');
-            
-            // Optional: Show brief feedback
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Added: ${item.getLabel(settings.currentLanguage)}'),
-                duration: const Duration(milliseconds: 500),
-                behavior: SnackBarBehavior.floating,
-              ),
+    final rows = settings.gridRows.clamp(1, 8);
+    final columns = settings.gridColumns.clamp(2, 4);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalSpacing = 8.0;
+        final verticalSpacing = 8.0;
+        final padding = 16.0;
+        final gridWidth = constraints.maxWidth;
+        final gridHeight = constraints.maxHeight;
+
+        final availableWidth = math.max(
+          gridWidth - padding - ((columns - 1) * horizontalSpacing),
+          columns * 36.0,
+        );
+        final availableHeight = math.max(
+          gridHeight - ((rows - 1) * verticalSpacing),
+          rows * 48.0,
+        );
+
+        final tileWidth = availableWidth / columns;
+        final tileHeight = availableHeight / rows;
+        final childAspectRatio = tileHeight > 0 ? tileWidth / tileHeight : 1.0;
+
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(8.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: horizontalSpacing,
+            mainAxisSpacing: verticalSpacing,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return VocabularyGridItem(
+              item: item,
+              iconSize: settings.iconSize,
+              showTextLabels: settings.showTextLabels,
+              isDark: isDark,
+              onTap: () async {
+                debugPrint('Tapped item: ${item.getLabel(settings.currentLanguage)}');
+                debugPrint('Current sentence before: ${communicationProvider.currentSentence.length}');
+
+                await communicationProvider.addWordToSentence(item);
+
+                debugPrint('Current sentence after: ${communicationProvider.currentSentence.length}');
+
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Added: ${item.getLabel(settings.currentLanguage)}'),
+                    duration: const Duration(milliseconds: 500),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
             );
           },
         );

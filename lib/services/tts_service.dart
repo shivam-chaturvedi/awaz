@@ -27,12 +27,20 @@ class TTSService {
     // Map language codes to TTS language codes
     String ttsLanguageCode = _getTTSLanguageCode(languageCode);
     
+    debugPrint('TTS: Setting language from $languageCode to $ttsLanguageCode');
+    
     try {
       await _flutterTts.setLanguage(ttsLanguageCode);
+      debugPrint('TTS: Successfully set language to $ttsLanguageCode');
     } catch (e) {
-      debugPrint('Error setting TTS language: $e');
+      debugPrint('TTS: Error setting language to $ttsLanguageCode: $e');
       // Fallback to English
-      await _flutterTts.setLanguage('en-US');
+      try {
+        await _flutterTts.setLanguage('en-US');
+        debugPrint('TTS: Fallback to en-US successful');
+      } catch (fallbackError) {
+        debugPrint('TTS: Fallback to en-US also failed: $fallbackError');
+      }
     }
   }
 
@@ -68,6 +76,7 @@ class TTSService {
     if (text.isEmpty) return;
     
     await initialize();
+    debugPrint('TTS: Speaking text in language $_currentLanguage: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
     await _flutterTts.speak(text);
   }
 

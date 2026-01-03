@@ -11,6 +11,18 @@ class LanguageUtils {
     'gu': 'ગુજરાતી (Gujarati)',
   };
 
+  static const Map<String, String> languageFlags = {
+    'en': '🇺🇸',
+    'hi': '🇮🇳',
+    'ta': '🇮🇳',
+    'te': '🇮🇳',
+    'kn': '🇮🇳',
+    'ml': '🇮🇳',
+    'mr': '🇮🇳',
+    'bn': '🇧🇩',
+    'gu': '🇮🇳',
+  };
+
   static const List<String> supportedLanguages = [
     'en',
     'hi',
@@ -25,6 +37,10 @@ class LanguageUtils {
 
   static String getLanguageName(String languageCode) {
     return languageNames[languageCode] ?? languageCode;
+  }
+
+  static String getLanguageFlag(String languageCode) {
+    return languageFlags[languageCode] ?? '🌐';
   }
 
   static bool isSupported(String languageCode) {

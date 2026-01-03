@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:translator/translator.dart';
+import 'package:flutter_translate/flutter_translate.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 import '../services/tts_service.dart';
+import '../services/translation_service.dart';
+import '../providers/settings_provider.dart';
+import '../utils/language_utils.dart';
 
 const _cardBackgroundColor = Color(0xFF1B1B1F);
 const _dropdownBackgroundColor = Color(0xFF101010);
@@ -13,33 +17,13 @@ class SpeakScreen extends StatefulWidget {
   State<SpeakScreen> createState() => _SpeakScreenState();
 }
 
-class SpeakLanguage {
-  final String name;
-  final String code;
-  final String flag;
-
-  const SpeakLanguage({
-    required this.name,
-    required this.code,
-    required this.flag,
-  });
-}
-
 class _SpeakScreenState extends State<SpeakScreen> {
   final SpeechRecognition _speechRecognition = SpeechRecognition();
-  final GoogleTranslator _translator = GoogleTranslator();
+  final TranslationService _translationService = TranslationService();
   final TTSService _ttsService = TTSService();
+  final TextEditingController _manualTextController = TextEditingController();
 
-  final _languages = const [
-    SpeakLanguage(name: 'English', code: 'en', flag: '🇺🇸'),
-    SpeakLanguage(name: 'Hindi', code: 'hi', flag: '🇮🇳'),
-    SpeakLanguage(name: 'Bengali', code: 'bn', flag: '🇧🇩'),
-    SpeakLanguage(name: 'Tamil', code: 'ta', flag: '🇮🇳'),
-    SpeakLanguage(name: 'Telugu', code: 'te', flag: '🇮🇳'),
-    SpeakLanguage(name: 'Spanish', code: 'es', flag: '🇪🇸'),
-  ];
-
-  late SpeakLanguage _selectedLanguage = _languages[2];
+  String _selectedLanguageCode = 'en';
   bool _speechAvailable = false;
   bool _isListening = false;
   bool _isTranslating = false;
@@ -52,6 +36,13 @@ class _SpeakScreenState extends State<SpeakScreen> {
   void initState() {
     super.initState();
     _configureSpeechRecognition();
+    // Initialize selected language from app settings
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+      setState(() {
+        _selectedLanguageCode = settingsProvider.settings.currentLanguage;
+      });
+    });
   }
 
   Future<void> _configureSpeechRecognition() async {
@@ -109,16 +100,30 @@ class _SpeakScreenState extends State<SpeakScreen> {
     }
   }
 
-  Future<void> _translateText() async {
-    if (_recognizedText.trim().isEmpty) return;
-    setState(() => _isTranslating = true);
+  Future<void> _translateText() async => _performTranslation(_recognizedText);
+
+  Future<void> _translateManualText() async {
+    final manualText = _manualTextController.text;
+    if (manualText.trim().isEmpty) return;
+    await _performTranslation(manualText, updateRecognized: true);
+  }
+
+  Future<void> _performTranslation(String text, {bool updateRecognized = false}) async {
+    final inputText = text.trim();
+    if (inputText.isEmpty) return;
+    if (updateRecognized && mounted) {
+      setState(() => _recognizedText = inputText);
+    }
+
+    if (mounted) setState(() => _isTranslating = true);
     try {
-      final translation = await _translator.translate(
-        _recognizedText,
-        to: _selectedLanguage.code,
+      final translatedText = await _translationService.translate(
+        text: inputText,
+        targetLanguage: _selectedLanguageCode,
+        sourceLanguage: 'en',
       );
       if (!mounted) return;
-      setState(() => _translatedText = translation.text);
+      setState(() => _translatedText = translatedText);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +140,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
     setState(() => _isPlaying = true);
     final previousLanguage = _ttsService.currentLanguage;
     try {
-      await _ttsService.setLanguage(_selectedLanguage.code);
+      await _ttsService.setLanguage(_selectedLanguageCode);
       await _ttsService.speak(_translatedText);
     } catch (e) {
       if (mounted) {
@@ -153,6 +158,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
     setState(() {
       _recognizedText = '';
       _translatedText = '';
+      _manualTextController.clear();
     });
   }
 
@@ -250,6 +256,97 @@ class _SpeakScreenState extends State<SpeakScreen> {
     );
   }
 
+  Widget _buildManualInputCard() {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade800),
+        color: _cardBackgroundColor,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.amber.shade300,
+                  child: const Icon(Icons.edit, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  translate('speak.manual_input_title'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+                TextField(
+                  controller: _manualTextController,
+                  minLines: 3,
+                  maxLines: 5,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.black54,
+                    hintText: translate('speak.manual_input_hint'),
+                    hintStyle: TextStyle(color: Colors.white70),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: Colors.grey.shade600),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _isTranslating ? null : _translateManualText,
+                    icon: _isTranslating
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.swap_horiz),
+                    label: Text(
+                      _isTranslating ? 'Converting...' : translate('speak.manual_input_button'),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey.shade700,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                TextButton(
+                  onPressed: () => _manualTextController.clear(),
+                  child: Text(translate('speak.manual_input_clear')),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              translate('speak.manual_input_helper'),
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -273,6 +370,8 @@ class _SpeakScreenState extends State<SpeakScreen> {
               ),
               const SizedBox(height: 18),
               _buildHeader(),
+              const SizedBox(height: 6),
+              _buildManualInputCard(),
               _buildCard(
                 step: 1,
                 title: 'Record Your Voice',
@@ -358,7 +457,10 @@ class _SpeakScreenState extends State<SpeakScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.translate),
-                      label: Text(_isTranslating ? 'Translating...' : 'Transcribe & Translate'),
+                    label: Text(
+                      _isTranslating ? 'Translating...' : 'Transcribe & Translate',
+                      style: const TextStyle(color: Colors.white),
+                    ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple.shade400,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -372,7 +474,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                 title: 'Choose Output Language',
                 accent: Colors.orange.shade100,
                 child: DropdownButtonFormField<String>(
-                  initialValue: _selectedLanguage.code,
+                  value: _selectedLanguageCode,
                   dropdownColor: _dropdownBackgroundColor,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -385,16 +487,16 @@ class _SpeakScreenState extends State<SpeakScreen> {
                   ),
                   style: const TextStyle(color: Colors.white),
                   iconEnabledColor: Colors.white,
-                  items: _languages
+                  items: LanguageUtils.supportedLanguages
                       .map(
-                        (language) => DropdownMenuItem(
-                          value: language.code,
+                        (langCode) => DropdownMenuItem(
+                          value: langCode,
                           child: Row(
                             children: [
-                              Text(language.flag),
+                              Text(LanguageUtils.getLanguageFlag(langCode)),
                               const SizedBox(width: 10),
                               Text(
-                                language.name,
+                                LanguageUtils.getLanguageName(langCode),
                                 style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                               ),
                             ],
@@ -404,11 +506,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                       .toList(),
                   onChanged: (value) {
                     if (value == null) return;
-                    final selection = _languages.firstWhere(
-                      (lang) => lang.code == value,
-                      orElse: () => _selectedLanguage,
-                    );
-                    setState(() => _selectedLanguage = selection);
+                    setState(() => _selectedLanguageCode = value);
                   },
                 ),
               ),
@@ -443,7 +541,9 @@ class _SpeakScreenState extends State<SpeakScreen> {
                             )
                           : const Icon(Icons.play_circle),
                       label: Text(
-                        _isPlaying ? 'Playing ${_selectedLanguage.name} audio' : 'Play ${_selectedLanguage.name} Audio',
+                        _isPlaying 
+                            ? 'Playing ${LanguageUtils.getLanguageName(_selectedLanguageCode)} audio' 
+                            : 'Play ${LanguageUtils.getLanguageName(_selectedLanguageCode)} Audio',
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green.shade700,
@@ -459,5 +559,11 @@ class _SpeakScreenState extends State<SpeakScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _manualTextController.dispose();
+    super.dispose();
   }
 }

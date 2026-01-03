@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/vocabulary_item.dart';
 import '../utils/color_utils.dart';
+import '../services/translation_service.dart';
 import '../utils/image_helper.dart';
 import '../providers/settings_provider.dart';
 
@@ -57,6 +58,7 @@ class VocabularyGridItem extends StatelessWidget {
           ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Padding(
@@ -69,33 +71,24 @@ class VocabularyGridItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                 child: Consumer<SettingsProvider>(
                   builder: (context, settingsProvider, _) {
+                    final currentLanguage = settingsProvider.settings.currentLanguage;
+                    final baseLabel = item.labels['en'] ?? item.labels.values.first;
                     return Column(
                       children: [
-                        Text(
-                          item.getLabel(settingsProvider.settings.currentLanguage),
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 12 * iconSize,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if ((detailText ?? '').isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2.0),
-                            child: Text(
-                              detailText!,
-                              style: TextStyle(
-                                color: textColor.withAlpha(217),
-                                fontSize: 9 * iconSize,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                        _buildLabelText(baseLabel, currentLanguage, textColor),
+                        if ((detailText ?? '').isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            detailText!,
+                            style: TextStyle(
+                              color: textColor.withAlpha(217),
+                              fontSize: 9 * iconSize,
                             ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ],
                       ],
                     );
                   },
@@ -140,6 +133,51 @@ class VocabularyGridItem extends StatelessWidget {
         color: ColorUtils.getTextColorForScheme(item.colorScheme, isDark),
       );
     }
+  }
+
+  Widget _buildLabelText(String baseLabel, String languageCode, Color textColor) {
+    final textStyle = TextStyle(
+      color: textColor,
+      fontSize: 12 * iconSize,
+      fontWeight: FontWeight.bold,
+    );
+
+    if (languageCode == 'en' || baseLabel.trim().isEmpty) {
+      return Text(
+        baseLabel,
+        style: textStyle,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: TranslationService().translate(
+        text: baseLabel,
+        targetLanguage: languageCode,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text(
+            baseLabel,
+            style: textStyle,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          );
+        }
+
+        final label = snapshot.data ?? baseLabel;
+        return Text(
+          label,
+          style: textStyle,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        );
+      },
+    );
   }
 
   IconData _getIconForCategory(String category) {

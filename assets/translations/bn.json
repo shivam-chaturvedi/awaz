@@ -1,0 +1,67 @@
+{
+    "app_name": "Awaz AAC",
+    "tabs": {
+        "communicate": "যোগাযোগ",
+        "speak": "কথা বলুন",
+        "keyboard": "কীবোর্ড",
+        "custom": "কাস্টম",
+        "settings": "সেটিংস"
+    },
+    "settings": {
+        "title": "সেটিংস",
+        "language": "ভাষা",
+        "theme": "থিম",
+        "grid_layout": "গ্রিড লেআউট",
+        "accessibility": "অ্যাক্সেসিবিলিটি",
+        "frozen_row": "ফ্রোজেন রো",
+        "frozen_row_desc": "ঘন ঘন ব্যবহৃত শব্দগুলি দৃশ্যমান রাখুন",
+        "auto_speak": "অটো স্পিক",
+        "auto_speak_desc": "নির্বাচিত শব্দগুলি স্বয়ংক্রিয়ভাবে বলুন",
+        "theme_light": "লাইট",
+        "theme_dark": "ডার্ক",
+        "theme_high_contrast": "হাই কন্ট্রাস্ট",
+        "done": "সম্পন্ন"
+    },
+    "speak": {
+        "title": "কথা বলুন",
+        "subtitle": "চারটি সহজ ধাপে আপনার ভয়েসকে অন্য ভাষায় অনুবাদ করুন।",
+        "header_title": "ভয়েস টু মাল্টিলিঙ্গুয়াল",
+        "header_subtitle": "যেকোনো ভাষায় কথা বলুন · অন্যটিতে শুনুন",
+        "step1_title": "আপনার ভয়েস রেকর্ড করুন",
+        "step1_button": "রেকর্ড করতে ট্যাপ করুন",
+        "step1_listening": "শুনছে...",
+        "step1_status_ready": "কথা বলা শুরু করতে মাইক ট্যাপ করুন",
+        "step1_status_unavailable": "মাইক্রোফোন উপলব্ধ নেই",
+        "step2_title": "আপনার টেক্সট",
+        "step2_placeholder": "আপনি যা বলেছেন তা এখানে প্রদর্শিত হবে।",
+        "step2_button": "ট্রান্সক্রাইব ও অনুবাদ করুন",
+        "step2_translating": "অনুবাদ করা হচ্ছে...",
+        "step2_clear": "পরিষ্কার করুন",
+        "step3_title": "আউটপুট ভাষা নির্বাচন করুন",
+        "step4_title": "অডিও প্লে করুন",
+        "step4_placeholder": "অনুবাদিত টেক্সট এখানে প্রদর্শিত হবে।",
+        "step4_button_play": "{} অডিও প্লে করুন",
+        "step4_button_playing": "{} অডিও প্লে হচ্ছে",
+        "error_translation": "অনুবাদ ব্যর্থ হয়েছে",
+        "error_audio": "অডিও প্লে করতে অক্ষম",
+        "manual_input_title": "Type or paste text",
+        "manual_input_hint": "Enter text to convert",
+        "manual_input_button": "Convert text",
+        "manual_input_clear": "Clear",
+        "manual_input_helper": "You can either speak via the mic or type text above and convert it instantly."
+    },
+    "communication": {
+        "title": "যোগাযোগ",
+        "added": "যোগ করা হয়েছে"
+    },
+    "keyboard": {
+        "title": "কীবোর্ড"
+    },
+    "custom_vocabulary": {
+        "title": "কাস্টম শব্দভাণ্ডার",
+        "current_language": "বর্তমান ভাষা"
+    },
+    "caregiver_dashboard": {
+        "title": "কেয়ারগিভার ড্যাশবোর্ড"
+    }
+}

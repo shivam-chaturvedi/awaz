@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'app_settings.g.dart';
-
-@JsonSerializable()
 class AppSettings {
   final String currentLanguage; // Language code (en, hi, ta, etc.)
   final AppThemeMode themeMode; // light, dark, highContrast
@@ -24,7 +19,7 @@ class AppSettings {
   final bool autoSpeak; // Auto speak on selection
   final int maxRecentWords; // For recent words suggestions
 
-  AppSettings({
+    AppSettings({
     this.currentLanguage = 'en',
     this.themeMode = AppThemeMode.light,
     this.gridRows = 4,
@@ -91,10 +86,56 @@ class AppSettings {
     );
   }
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) =>
-      _$AppSettingsFromJson(json);
+  factory AppSettings.fromJson(Map<String, dynamic> json) {
+    return AppSettings(
+      currentLanguage: json['currentLanguage'] as String? ?? 'en',
+      themeMode: _themeModeFromString(json['themeMode'] as String?),
+      gridRows: json['gridRows'] as int? ?? 4,
+      gridColumns: json['gridColumns'] as int? ?? 4,
+      iconSize: (json['iconSize'] as num?)?.toDouble() ?? 1.0,
+      showTextLabels: json['showTextLabels'] as bool? ?? true,
+      enableSoundEffects: json['enableSoundEffects'] as bool? ?? true,
+      enableVibration: json['enableVibration'] as bool? ?? false,
+      speechRate: (json['speechRate'] as num?)?.toDouble() ?? 0.5,
+      speechPitch: (json['speechPitch'] as num?)?.toDouble() ?? 1.0,
+      selectedVoice: json['selectedVoice'] as String?,
+      enableFrozenRow: json['enableFrozenRow'] as bool? ?? true,
+      frozenRowCount: json['frozenRowCount'] as int? ?? 1,
+      enableSwitchAccess: json['enableSwitchAccess'] as bool? ?? false,
+      switchAccessScanInterval: json['switchAccessScanInterval'] as int? ?? 1000,
+      enableScreenReader: json['enableScreenReader'] as bool? ?? true,
+      favoriteCategories: (json['favoriteCategories'] as List<dynamic>?)
+              ?.map((item) => item as String)
+              .toList() ??
+          const [],
+      autoSpeak: json['autoSpeak'] as bool? ?? true,
+      maxRecentWords: json['maxRecentWords'] as int? ?? 10,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$AppSettingsToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'currentLanguage': currentLanguage,
+      'themeMode': themeMode.name,
+      'gridRows': gridRows,
+      'gridColumns': gridColumns,
+      'iconSize': iconSize,
+      'showTextLabels': showTextLabels,
+      'enableSoundEffects': enableSoundEffects,
+      'enableVibration': enableVibration,
+      'speechRate': speechRate,
+      'speechPitch': speechPitch,
+      'selectedVoice': selectedVoice,
+      'enableFrozenRow': enableFrozenRow,
+      'frozenRowCount': frozenRowCount,
+      'enableSwitchAccess': enableSwitchAccess,
+      'switchAccessScanInterval': switchAccessScanInterval,
+      'enableScreenReader': enableScreenReader,
+      'favoriteCategories': favoriteCategories,
+      'autoSpeak': autoSpeak,
+      'maxRecentWords': maxRecentWords,
+    };
+  }
 }
 
 enum AppThemeMode {
@@ -103,3 +144,11 @@ enum AppThemeMode {
   highContrast,
 }
 
+AppThemeMode _themeModeFromString(String? value) {
+  switch (value) {
+    case 'dark':
+      return AppThemeMode.dark;
+    default:
+      return AppThemeMode.light;
+  }
+}
