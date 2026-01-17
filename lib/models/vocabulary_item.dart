@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'vocabulary_item.g.dart';
-
-@JsonSerializable()
 class VocabularyItem {
   final String id;
   final String? imagePath; // Local path or asset path
@@ -70,10 +65,44 @@ class VocabularyItem {
     );
   }
 
-  factory VocabularyItem.fromJson(Map<String, dynamic> json) =>
-      _$VocabularyItemFromJson(json);
+  factory VocabularyItem.fromJson(Map<String, dynamic> json) {
+    final labelsMap = json['labels'] as Map<String, dynamic>? ?? {};
+    final relatedIds = (json['relatedWordIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [];
 
-  Map<String, dynamic> toJson() => _$VocabularyItemToJson(this);
+    return VocabularyItem(
+      id: json['id'] as String,
+      imagePath: json['imagePath'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      labels: labelsMap.map((key, value) => MapEntry(key, value as String)),
+      category: json['category'] as String,
+      parentId: json['parentId'] as String?,
+      relatedWordIds: relatedIds,
+      tapCount: json['tapCount'] as int? ?? 0,
+      lastUsed: json['lastUsed'] != null ? DateTime.tryParse(json['lastUsed'] as String) : null,
+      isFavorite: json['isFavorite'] as bool? ?? false,
+      colorScheme: _colorSchemeFromString(json['colorScheme'] as String?) ?? VocabularyColorScheme.blue,
+      gridPosition: json['gridPosition'] as int?,
+      isFrozen: json['isFrozen'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'imagePath': imagePath,
+      'imageUrl': imageUrl,
+      'labels': labels,
+      'category': category,
+      'parentId': parentId,
+      'relatedWordIds': relatedWordIds,
+      'tapCount': tapCount,
+      'lastUsed': lastUsed?.toIso8601String(),
+      'isFavorite': isFavorite,
+      'colorScheme': colorScheme.name,
+      'gridPosition': gridPosition,
+      'isFrozen': isFrozen,
+    };
+  }
 }
 
 enum VocabularyColorScheme {
@@ -90,3 +119,10 @@ enum VocabularyColorScheme {
   gray,
 }
 
+VocabularyColorScheme? _colorSchemeFromString(String? value) {
+  if (value == null || value.isEmpty) return null;
+  return VocabularyColorScheme.values.firstWhere(
+    (scheme) => scheme.name == value,
+    orElse: () => VocabularyColorScheme.blue,
+  );
+}

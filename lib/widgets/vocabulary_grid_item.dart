@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
@@ -29,79 +31,105 @@ class VocabularyGridItem extends StatelessWidget {
     final textColor = ColorUtils.getTextColorForScheme(item.colorScheme, isDark);
     final detailText = item.labels['detail'];
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          // Add haptic feedback
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(12.0),
-        splashColor: Colors.white.withAlpha(77),
-        highlightColor: Colors.white.withAlpha(26),
-        child: Container(
-          margin: const EdgeInsets.all(4.0),
-          decoration: BoxDecoration(
-            color: color,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxHeight = constraints.maxHeight.isFinite && constraints.maxHeight > 0
+            ? constraints.maxHeight
+            : 160.0;
+        final labelMaxHeight = showTextLabels
+            ? math.min(
+                math.min(maxHeight, 56.0),
+                math.max(maxHeight * 0.24, 28.0),
+              )
+            : 0.0;
+        final heightScale = math.max(0.7, math.min(1.0, maxHeight / 160.0));
+        final adaptiveIconScale = iconSize * heightScale;
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              onTap();
+            },
             borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-              color: isDark ? Colors.white : Colors.black,
-              width: 2.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(51),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _buildImage(),
-              ),
-            ),
-            if (showTextLabels)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                child: Consumer<SettingsProvider>(
-                  builder: (context, settingsProvider, _) {
-                    final currentLanguage = settingsProvider.settings.currentLanguage;
-                    final baseLabel = item.labels['en'] ?? item.labels.values.first;
-                    return Column(
-                      children: [
-                        _buildLabelText(baseLabel, currentLanguage, textColor),
-                        if ((detailText ?? '').isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            detailText!,
-                            style: TextStyle(
-                              color: textColor.withAlpha(217),
-                              fontSize: 9 * iconSize,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
-                    );
-                  },
+            splashColor: Colors.white.withAlpha(77),
+            highlightColor: Colors.white.withAlpha(26),
+            child: Container(
+              margin: const EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: isDark ? Colors.white : Colors.black,
+                  width: 2.5,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(51),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-          ],
-        ),
-        ),
-      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _buildImage(adaptiveIconScale),
+                    ),
+                  ),
+                  if (showTextLabels) ...[
+                    const SizedBox(height: 2),
+                    SizedBox(
+                      height: labelMaxHeight,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Consumer<SettingsProvider>(
+                          builder: (context, settingsProvider, _) {
+                            final currentLanguage = settingsProvider.settings.currentLanguage;
+                            final baseLabel = item.labels['en'] ?? item.labels.values.first;
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildLabelText(
+                                  baseLabel,
+                                  currentLanguage,
+                                  textColor,
+                                  adaptiveIconScale,
+                                ),
+                                if ((detailText ?? '').isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    detailText!,
+                                    style: TextStyle(
+                                      color: textColor.withAlpha(217),
+                                      fontSize: 10 * adaptiveIconScale,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(double adaptiveScale) {
     if (item.imageUrl != null) {
       return CachedNetworkImage(
         imageUrl: item.imageUrl!,
@@ -121,24 +149,29 @@ class VocabularyGridItem extends StatelessWidget {
         // File path - use helper for platform-specific image loading
         return buildImageFromPath(
           item.imagePath!,
-          height: 48 * iconSize,
-          width: 48 * iconSize,
+          height: 48 * adaptiveScale,
+          width: 48 * adaptiveScale,
         );
       }
     } else {
       // Default icon based on category
       return Icon(
         _getIconForCategory(item.category),
-        size: 48 * iconSize,
+        size: 48 * adaptiveScale,
         color: ColorUtils.getTextColorForScheme(item.colorScheme, isDark),
       );
     }
   }
 
-  Widget _buildLabelText(String baseLabel, String languageCode, Color textColor) {
+  Widget _buildLabelText(
+    String baseLabel,
+    String languageCode,
+    Color textColor,
+    double adaptiveScale,
+  ) {
     final textStyle = TextStyle(
       color: textColor,
-      fontSize: 12 * iconSize,
+      fontSize: 14 * adaptiveScale,
       fontWeight: FontWeight.bold,
     );
 

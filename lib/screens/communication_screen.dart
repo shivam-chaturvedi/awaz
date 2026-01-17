@@ -41,37 +41,64 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
         final settings = settingsProvider.settings;
 
         return SafeArea(
-      child: Column(
-        children: [
-          // Sentence bar - always visible and prominent
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              boxShadow: [
-                BoxShadow(
-                color: Colors.black.withAlpha(26),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isTabletLayout = constraints.maxWidth >= 900;
+          final gridContent = vocabularyProvider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildVocabularyGrid(
+                  vocabularyProvider,
+                  communicationProvider,
+                  settings,
+                  isTabletLayout: isTabletLayout,
+                );
+          final categoryBar = _buildCategoryBar(
+            vocabularyProvider,
+            isTablet: isTabletLayout,
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Sentence bar - always visible and prominent
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(26),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: const SentenceBar(),
-          ),
-          
-          // Frozen row (if enabled)
-          if (settings.enableFrozenRow)
-            FrozenRow(items: vocabularyProvider.getFrozenRowItems()),
-          
-          // Main vocabulary grid
-          Expanded(
-            child: vocabularyProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _buildVocabularyGrid(vocabularyProvider, communicationProvider, settings),
-          ),
-          
-          // Category bar
-          _buildCategoryBar(vocabularyProvider),
-        ],
+                child: const SentenceBar(),
+              ),
+
+              // Frozen row (if enabled)
+              if (settings.enableFrozenRow)
+                FrozenRow(items: vocabularyProvider.getFrozenRowItems()),
+
+              Expanded(
+                child: isTabletLayout
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: gridContent),
+                          categoryBar,
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: gridContent),
+                          categoryBar,
+                        ],
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
       },
@@ -81,8 +108,9 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
   Widget _buildVocabularyGrid(
     VocabularyProvider vocabularyProvider,
     CommunicationProvider communicationProvider,
-    AppSettings settings,
-  ) {
+    AppSettings settings, {
+    bool isTabletLayout = false,
+  }) {
     final items = vocabularyProvider.vocabularyItems;
 
     if (items.isEmpty) {
@@ -103,14 +131,15 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
       );
     }
 
-    final rows = settings.gridRows.clamp(1, 8);
+    final rows = settings.gridRows.clamp(1, 5);
     final columns = settings.gridColumns.clamp(2, 4);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalSpacing = 8.0;
-        final verticalSpacing = 8.0;
-        final padding = 16.0;
+        final horizontalSpacing = isTabletLayout ? 12.0 : 8.0;
+        final verticalSpacing = isTabletLayout ? 12.0 : 8.0;
+        final padding = isTabletLayout ? 32.0 : 16.0;
+        final gridPadding = isTabletLayout ? 16.0 : 8.0;
         final gridWidth = constraints.maxWidth;
         final gridHeight = constraints.maxHeight;
 
@@ -130,7 +159,7 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return GridView.builder(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(gridPadding),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             childAspectRatio: childAspectRatio,
@@ -170,53 +199,109 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
     );
   }
 
-  Widget _buildCategoryBar(VocabularyProvider vocabularyProvider) {
+  Widget _buildCategoryBar(
+    VocabularyProvider vocabularyProvider, {
+    bool isTablet = false,
+  }) {
     final categories = vocabularyProvider.getCategories();
-    
+
     if (categories.isEmpty) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+
+    final buttons = <Widget>[
+      _buildCategoryButton(
+        label: 'All',
+        onPressed: () => vocabularyProvider.loadVocabularyItems(),
+        isTablet: isTablet,
+      ),
+      ...categories.map((category) {
+        return _buildCategoryButton(
+          label: category,
+          onPressed: () => vocabularyProvider.loadVocabularyItems(category: category),
+          isTablet: isTablet,
+        );
+      }).toList(),
+    ];
+
+    if (isTablet) {
+      return Container(
+        width: 220,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            left: BorderSide(
+              color: theme.dividerColor,
+              width: 1.0,
+            ),
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: buttons,
+          ),
+        ),
+      );
+    }
 
     return Container(
       height: 70,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: theme.colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).dividerColor,
+            color: theme.dividerColor,
             width: 1.0,
           ),
         ),
       ),
-      child: ListView.builder(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        itemCount: categories.length + 1, // +1 for "All"
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-              child: ElevatedButton(
-                onPressed: () => vocabularyProvider.loadVocabularyItems(),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-                child: const Text('All', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            );
-          }
-          
-          final category = categories[index - 1];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: () => vocabularyProvider.loadVocabularyItems(category: category),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: Text(category),
-            ),
-          );
-        },
+        children: buttons,
       ),
+    );
+  }
+
+  Widget _buildCategoryButton({
+    required String label,
+    required VoidCallback onPressed,
+    required bool isTablet,
+  }) {
+    final button = ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: isTablet
+            ? const EdgeInsets.symmetric(vertical: 14.0, horizontal: 18.0)
+            : const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+
+    final padding = isTablet
+        ? const EdgeInsets.symmetric(vertical: 4.0)
+        : const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0);
+
+    if (isTablet) {
+      return Padding(
+        padding: padding,
+        child: SizedBox(
+          width: double.infinity,
+          child: button,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: padding,
+      child: button,
     );
   }
 }

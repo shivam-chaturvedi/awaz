@@ -54,11 +54,11 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(LocalizedApp(localizationDelegate, const AwazApp()));
+  runApp(LocalizedApp(localizationDelegate, const ChinnamApp()));
 }
 
-class AwazApp extends StatelessWidget {
-  const AwazApp({super.key});
+class ChinnamApp extends StatelessWidget {
+  const ChinnamApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +93,9 @@ class AwazApp extends StatelessWidget {
             final theme = ColorUtils.getThemeForMode(settings.themeMode);
 
             return MaterialApp(
-              title: 'Awaz AAC',
+              title: translate('app_name'),
               debugShowCheckedModeBanner: false,
-            localizationsDelegates: [
+              localizationsDelegates: [
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,

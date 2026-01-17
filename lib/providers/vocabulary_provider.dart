@@ -8,6 +8,38 @@ class VocabularyProvider with ChangeNotifier {
   List<VocabularyItem> _recentWords = [];
   String? _currentCategory;
   bool _isLoading = false;
+  static const List<String> _priorityLabels = [
+    'Yes',
+    'No',
+    'Eating',
+    'Running',
+    'Hungry',
+    'Mom',
+    'Dad',
+  ];
+
+  List<VocabularyItem> _applyPriorityOrder(List<VocabularyItem> items) {
+    final prioritized = [...items];
+    prioritized.sort((a, b) {
+      final aIndex = _priorityIndex(a);
+      final bIndex = _priorityIndex(b);
+      if (aIndex != bIndex) return aIndex.compareTo(bIndex);
+      final aLabel = _getLabelForSorting(a);
+      final bLabel = _getLabelForSorting(b);
+      return aLabel.compareTo(bLabel);
+    });
+    return prioritized;
+  }
+
+  int _priorityIndex(VocabularyItem item) {
+    final label = _getLabelForSorting(item);
+    final index = _priorityLabels.indexOf(label);
+    return index == -1 ? _priorityLabels.length : index;
+  }
+
+  String _getLabelForSorting(VocabularyItem item) {
+    return item.labels['en'] ?? item.labels.values.firstWhere((_) => true, orElse: () => '');
+  }
 
   List<VocabularyItem> get vocabularyItems => _vocabularyItems;
   List<VocabularyItem> get recentWords => _recentWords;
@@ -26,6 +58,7 @@ class VocabularyProvider with ChangeNotifier {
         _vocabularyItems = await _storageService.getAllVocabularyItems();
         _currentCategory = null;
       }
+      _vocabularyItems = _applyPriorityOrder(_vocabularyItems);
       
       // Update recent words (most recently used)
       _recentWords = _vocabularyItems
@@ -96,5 +129,3 @@ class VocabularyProvider with ChangeNotifier {
     return _vocabularyItems.map((item) => item.category).toSet().toList();
   }
 }
-
-

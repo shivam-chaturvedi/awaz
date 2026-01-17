@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     
     <application
-        android:label="awaz"
+        android:label="Chinnam AAC"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

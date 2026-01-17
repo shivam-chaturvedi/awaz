@@ -372,11 +372,11 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       
       // Android: Save to file and share
       final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/awaz_backup_${DateTime.now().millisecondsSinceEpoch}.json');
+      final file = File('${directory.path}/chinnam_backup_${DateTime.now().millisecondsSinceEpoch}.json');
       await file.writeAsString(jsonString);
       
       if (context.mounted) {
-        await Share.shareXFiles([XFile(file.path)], subject: 'Awaz Backup');
+        await Share.shareXFiles([XFile(file.path)], subject: 'Chinnam AAC Backup');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data exported successfully')),
         );
@@ -399,4 +399,3 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     return buildImageFromPath(imagePath, height: 100);
   }
 }
-

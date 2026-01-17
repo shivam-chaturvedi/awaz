@@ -8,11 +8,47 @@ class VocabularyInitializer {
 
   static Future<void> initializeDefaultVocabulary() async {
     final existing = await _storageService.getAllVocabularyItems();
-    if (existing.isNotEmpty) return;
+    if (existing.isNotEmpty) {
+      await _ensureDefaults(existing);
+      return;
+    }
 
     final defaultItems = _createDefaultVocabulary();
     for (var item in defaultItems) {
       await _storageService.saveVocabularyItem(item);
+    }
+  }
+
+  static const Map<String, String> _defaultImagePaths = {
+    'Mom': 'assets/images/Mom.jpg',
+    'Dad': 'assets/images/Dad.jpg',
+    'Eating': 'assets/images/Eating.jpg',
+    'Running': 'assets/images/Running.jpg',
+    'Hungry': 'assets/images/Hungry.jpg',
+  };
+
+  static Future<void> _ensureDefaults(List<VocabularyItem> existing) async {
+    final existingByLabel = <String, VocabularyItem>{};
+    for (final item in existing) {
+      final fallbackLabel = item.labels.isNotEmpty ? item.labels.values.first : '';
+      final labelKey = item.labels['en'] ?? fallbackLabel;
+      if (labelKey.isEmpty) continue;
+      existingByLabel[labelKey] = item;
+    }
+
+    final defaults = _createDefaultVocabulary();
+    for (final defaultItem in defaults) {
+      final label = defaultItem.labels['en'] ?? '';
+      final existingItem = existingByLabel[label];
+      if (existingItem == null) {
+        await _storageService.saveVocabularyItem(defaultItem);
+        continue;
+      }
+
+      final targetPath = _defaultImagePaths[label];
+      if (targetPath != null && existingItem.imagePath != targetPath) {
+        await _storageService.saveVocabularyItem(existingItem.copyWith(imagePath: targetPath));
+      }
     }
   }
 
@@ -94,12 +130,14 @@ class VocabularyInitializer {
       ),
       VocabularyItem(
         id: _uuid.v4(),
+        imagePath: 'assets/images/Mom.jpg',
         labels: {'en': 'Mom'},
         category: 'PEOPLE',
         colorScheme: VocabularyColorScheme.pink,
       ),
       VocabularyItem(
         id: _uuid.v4(),
+        imagePath: 'assets/images/Dad.jpg',
         labels: {'en': 'Dad'},
         category: 'PEOPLE',
         colorScheme: VocabularyColorScheme.blue,
@@ -109,6 +147,20 @@ class VocabularyInitializer {
         labels: {'en': 'Eat'},
         category: 'ACTIONS',
         colorScheme: VocabularyColorScheme.orange,
+      ),
+      VocabularyItem(
+        id: _uuid.v4(),
+        imagePath: 'assets/images/Eating.jpg',
+        labels: {'en': 'Eating'},
+        category: 'ACTIONS',
+        colorScheme: VocabularyColorScheme.orange,
+      ),
+      VocabularyItem(
+        id: _uuid.v4(),
+        imagePath: 'assets/images/Running.jpg',
+        labels: {'en': 'Running'},
+        category: 'ACTIONS',
+        colorScheme: VocabularyColorScheme.green,
       ),
       VocabularyItem(
         id: _uuid.v4(),
@@ -139,6 +191,13 @@ class VocabularyInitializer {
         labels: {'en': 'Happy'},
         category: 'FEELINGS',
         colorScheme: VocabularyColorScheme.yellow,
+      ),
+      VocabularyItem(
+        id: _uuid.v4(),
+        imagePath: 'assets/images/Hungry.jpg',
+        labels: {'en': 'Hungry'},
+        category: 'FEELINGS',
+        colorScheme: VocabularyColorScheme.red,
       ),
       VocabularyItem(
         id: _uuid.v4(),

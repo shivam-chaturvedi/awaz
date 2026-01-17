@@ -160,13 +160,11 @@ class _SettingsTabState extends State<SettingsTab> {
               Slider(
                 value: rows.toDouble(),
                 min: 2,
-                max: 8,
-                divisions: 6,
+                max: 5,
+                divisions: 3,
                 label: '$rows',
                 onChanged: (value) {
-                  final newRows = value.toInt();
-                  setState(() => rows = newRows);
-                  settingsProvider.setGridLayout(newRows, columns);
+                  setState(() => rows = value.toInt());
                 },
               ),
               Text('Columns: $columns'),
@@ -177,16 +175,20 @@ class _SettingsTabState extends State<SettingsTab> {
                 divisions: 2,
                 label: '$columns',
                 onChanged: (value) {
-                  final newColumns = value.toInt();
-                  setState(() => columns = newColumns);
-                  settingsProvider.setGridLayout(rows, newColumns);
+                  setState(() => columns = value.toInt());
                 },
               ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                final shouldUpdate = rows != settings.gridRows || columns != settings.gridColumns;
+                if (shouldUpdate) {
+                  await settingsProvider.setGridLayout(rows, columns);
+                }
+                Navigator.pop(context);
+              },
               child: Text(translate('settings.done')),
             ),
           ],
@@ -220,7 +222,7 @@ class GridLayoutPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final previewRows = rows.clamp(1, 6) as int;
+    final previewRows = rows.clamp(1, 5) as int;
     final previewColumns = columns.clamp(1, 4) as int;
 
     return Column(

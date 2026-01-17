@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'usage_log.g.dart';
-
-@JsonSerializable()
 class UsageLog {
   final String id;
   final String vocabularyItemId;
@@ -20,13 +15,31 @@ class UsageLog {
     this.sessionDuration,
   });
 
-  factory UsageLog.fromJson(Map<String, dynamic> json) =>
-      _$UsageLogFromJson(json);
+  factory UsageLog.fromJson(Map<String, dynamic> json) {
+    return UsageLog(
+      id: json['id'] as String,
+      vocabularyItemId: json['vocabularyItemId'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      languageCode: json['languageCode'] as String,
+      sentence: json['sentence'] as String?,
+      sessionDuration: json['sessionDuration'] != null
+          ? Duration(microseconds: json['sessionDuration'] as int)
+          : null,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$UsageLogToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'vocabularyItemId': vocabularyItemId,
+      'timestamp': timestamp.toIso8601String(),
+      'languageCode': languageCode,
+      'sentence': sentence,
+      'sessionDuration': sessionDuration?.inMicroseconds,
+    };
+  }
 }
 
-@JsonSerializable()
 class UsageStatistics {
   final Map<String, int> wordUsageCount; // wordId -> count
   final Map<String, int> categoryUsageCount; // category -> count
@@ -48,10 +61,44 @@ class UsageStatistics {
     this.recentWords = const [],
   });
 
-  factory UsageStatistics.fromJson(Map<String, dynamic> json) =>
-      _$UsageStatisticsFromJson(json);
+  factory UsageStatistics.fromJson(Map<String, dynamic> json) {
+    return UsageStatistics(
+      wordUsageCount: (json['wordUsageCount'] as Map<String, dynamic>?)
+              ?.map((key, value) => MapEntry(key, value as int)) ??
+          const {},
+      categoryUsageCount: (json['categoryUsageCount'] as Map<String, dynamic>?)
+              ?.map((key, value) => MapEntry(key, value as int)) ??
+          const {},
+      firstUsageDate: json['firstUsageDate'] != null
+          ? DateTime.parse(json['firstUsageDate'] as String)
+          : null,
+      lastUsageDate: json['lastUsageDate'] != null
+          ? DateTime.parse(json['lastUsageDate'] as String)
+          : null,
+      totalSessions: json['totalSessions'] as int? ?? 0,
+      totalUsageTime: Duration(microseconds: json['totalUsageTime'] as int? ?? 0),
+      mostUsedWords: (json['mostUsedWords'] as List<dynamic>?)
+              ?.map((item) => item as String)
+              .toList() ??
+          const [],
+      recentWords: (json['recentWords'] as List<dynamic>?)
+              ?.map((item) => item as String)
+              .toList() ??
+          const [],
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$UsageStatisticsToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'wordUsageCount': wordUsageCount,
+      'categoryUsageCount': categoryUsageCount,
+      'firstUsageDate': firstUsageDate?.toIso8601String(),
+      'lastUsageDate': lastUsageDate?.toIso8601String(),
+      'totalSessions': totalSessions,
+      'totalUsageTime': totalUsageTime.inMicroseconds,
+      'mostUsedWords': mostUsedWords,
+      'recentWords': recentWords,
+    };
+  }
 }
-
 

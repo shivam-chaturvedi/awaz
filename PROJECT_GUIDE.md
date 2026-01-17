@@ -1,4 +1,4 @@
-# Awaz AAC - Project Guide
+# Chinnam AAC - Project Guide
 
 ## 📁 Project Folder Structure
 
@@ -42,7 +42,7 @@ main() function:
   ├── Initialize TTSService (text-to-speech)
   ├── Initialize default vocabulary
   └── Set portrait orientation
-    └── Run AwazApp
+    └── Run ChinnamApp
 ```
 
 ### 2. **Provider Setup (main.dart)**
@@ -279,6 +279,5 @@ CommunicationScreen
 - **JSON errors:** Run `flutter pub run build_runner build`
 - **Database errors:** Check Android permissions in AndroidManifest.xml
 - **TTS not working:** Check device language support
-
 
 

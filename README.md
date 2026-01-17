@@ -1,4 +1,4 @@
-# Awaz AAC - Assistive Communication App
+# Chinnam AAC - Assistive Communication App
 
 An assistive communication application for people with disabilities, built with Flutter. Similar to Avaz AAC but without AI-based features, focusing on manual customization and reliability.
 
