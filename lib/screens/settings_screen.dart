@@ -4,6 +4,7 @@ import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/settings_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
+import 'legal_info_screen.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -82,6 +83,56 @@ class _SettingsTabState extends State<SettingsTab> {
                 },
               ),
             ],
+          ),
+          const SizedBox(height: 28),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              translate('settings.legal_section_title'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: Text(translate('settings.privacy_policy')),
+                    subtitle: Text(translate('settings.privacy_policy_desc')),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    title: Text(translate('settings.terms_of_service')),
+                    subtitle: Text(translate('settings.terms_of_service_desc')),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TermsOfServiceScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
