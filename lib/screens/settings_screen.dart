@@ -125,7 +125,7 @@ class _SettingsTabState extends State<SettingsTab> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const TermsOfServiceScreen(),
+                          builder: (context) => const TermsOfUseScreen(),
                         ),
                       );
                     },

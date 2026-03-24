@@ -24,9 +24,9 @@
     "done": "Done",
     "legal_section_title": "Legal",
     "privacy_policy": "Privacy Policy",
-    "privacy_policy_desc": "Read how we handle your data and privacy.",
-    "terms_of_service": "Terms of Service",
-    "terms_of_service_desc": "Understand your rights and responsibilities."
+    "privacy_policy_desc": "View the official privacy policy for Chinnam AAC.",
+    "terms_of_service": "Terms of Use",
+    "terms_of_service_desc": "Review the app's terms of use and responsibilities."
   },
   "speak": {
     "title": "Speak",
@@ -77,8 +77,8 @@
     "privacy_policy_paragraph_1": "Chinnam AAC collects only the information necessary to operate the app and improve accessibility. We respect your choices and offer transparent controls.",
     "privacy_policy_paragraph_2": "All data is stored locally on the device unless you explicitly export it. We do not sell or share personal data with third parties.",
     "privacy_policy_paragraph_3": "You can request deletion of your data by resetting the app or deleting stored files from the app settings.",
-    "terms_of_service_title": "Terms of Service",
-    "terms_of_service_description": "These terms outline the responsibilities that keep the app safe, accessible, and reliable for everyone.",
+    "terms_of_service_title": "Terms of Use",
+    "terms_of_service_description": "These terms of use outline the responsibilities that keep the app safe, accessible, and reliable for everyone.",
     "terms_of_service_paragraph_1": "By using Chinnam AAC, you agree to use the app responsibly, respecting accessibility norms and the safety of others.",
     "terms_of_service_paragraph_2": "Content shared through the app must not violate copyright or community standards. We reserve the right to suspend access if policies are abused.",
     "terms_of_service_paragraph_3": "We aim to provide a reliable communication tool but do not guarantee uninterrupted service. Updates and maintenance may occur periodically."

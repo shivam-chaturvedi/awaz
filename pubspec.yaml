@@ -66,6 +66,7 @@ dependencies:
   
   # Sharing/Export
   share_plus: ^7.2.1
+  url_launcher: ^6.1.9
   google_mlkit_translation: ^0.13.0
   speech_recognition:
     path: packages/speech_recognition

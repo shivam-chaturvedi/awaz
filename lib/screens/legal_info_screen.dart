@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_translate/flutter_translate.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final Uri _privacyPolicyUri =
+    Uri.parse('https://www.termsfeed.com/live/58fa3786-15f9-4568-91ec-5c241d88198f');
 
 class LegalSection {
   final String title;
@@ -27,8 +31,9 @@ class LegalDocument {
 
 class LegalInfoScreen extends StatelessWidget {
   final LegalDocument document;
+  final Widget? footer;
 
-  const LegalInfoScreen({super.key, required this.document});
+  const LegalInfoScreen({super.key, required this.document, this.footer});
 
   Widget _buildTableOfContents(BuildContext context) {
     final theme = Theme.of(context);
@@ -144,6 +149,10 @@ class LegalInfoScreen extends StatelessWidget {
                 index,
               ),
             ),
+            if (footer != null) ...[
+              const SizedBox(height: 16),
+              footer!,
+            ],
           ],
         ),
       ),
@@ -233,7 +242,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         LegalSection(
           title: 'How can you contact us?',
           paragraphs: [
-            'Send questions or feedback to support@chinnam.app. We aim to respond within two business days.',
+            'Send privacy, content, or feedback questions to dinoishan4@gmail.com. We aim to respond within two business days.',
           ],
         ),
         LegalSection(
@@ -246,15 +255,43 @@ class PrivacyPolicyScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _openPrivacyPolicyUrl(BuildContext context) async {
+    final launched = await launchUrl(
+      _privacyPolicyUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open privacy policy')),
+      );
+    }
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          icon: const Icon(Icons.open_in_new),
+          label: const Text('View Privacy Policy'),
+          onPressed: () => _openPrivacyPolicyUrl(context),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LegalInfoScreen(document: _buildDocument());
+    return LegalInfoScreen(
+      document: _buildDocument(),
+      footer: _buildFooter(context),
+    );
   }
 }
 
-class TermsOfServiceScreen extends StatelessWidget {
-  const TermsOfServiceScreen({super.key});
-
+class TermsOfUseScreen extends StatelessWidget {
+  const TermsOfUseScreen({super.key});
   LegalDocument _buildDocument() {
     return LegalDocument(
       title: translate('legal.terms_of_service_title'),
@@ -311,7 +348,7 @@ class TermsOfServiceScreen extends StatelessWidget {
         LegalSection(
           title: 'Contact and feedback',
           paragraphs: [
-            'We welcome questions at support@chinnam.app, and feedback helps us improve future releases.',
+            'We welcome content or feedback questions at dinoishan4@gmail.com, and your input helps us improve future releases.',
           ],
         ),
       ],

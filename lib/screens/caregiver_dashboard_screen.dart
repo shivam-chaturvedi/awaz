@@ -90,11 +90,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('Taps: ${item.tapCount}'),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () =>
-                        _showEditVocabularyDialog(vocabularyProvider, item, settings),
-                  ),
+                  const SizedBox(width: 12),
                   IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () => _deleteVocabularyItem(
@@ -327,15 +323,6 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _showEditVocabularyDialog(
-    VocabularyProvider vocabularyProvider,
-    VocabularyItem item,
-    AppSettings settings,
-  ) async {
-    // Similar to add dialog but pre-filled
-    // Implementation similar to _showAddVocabularyDialog
   }
 
   Future<void> _deleteVocabularyItem(
