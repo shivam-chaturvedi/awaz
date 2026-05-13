@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -35,26 +35,123 @@ Future<void> main() async {
     );
   };
 
-  await StorageService().initialize();
-  await TTSService().initialize();
+  // Avoid ANRs by rendering the first frame ASAP, then initializing services in
+  // the background from the widget tree.
+  runApp(const _BootstrapApp());
+}
 
-  await VocabularyInitializer.initializeDefaultVocabulary();
+class _BootstrapApp extends StatefulWidget {
+  const _BootstrapApp();
 
-  final localizationDelegate = await LocalizationDelegate.create(
-    fallbackLocale: 'en',
-    supportedLocales: LanguageUtils.supportedLanguages,
-    basePath: 'assets/translations',
-  );
+  @override
+  State<_BootstrapApp> createState() => _BootstrapAppState();
+}
 
-  final savedSettings = await StorageService().getSettings();
-  await localizationDelegate.changeLocale(localeFromString(savedSettings.currentLanguage));
+class _BootstrapAppState extends State<_BootstrapApp> {
+  Future<LocalizationDelegate>? _initFuture;
 
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  @override
+  void initState() {
+    super.initState();
+    _initFuture = _initialize();
+  }
 
-  runApp(LocalizedApp(localizationDelegate, const ChinnamApp()));
+  Future<LocalizationDelegate> _initialize() async {
+    try {
+      // Initialize storage early so we can read saved settings, but don't block
+      // startup indefinitely on slower devices.
+      await StorageService().initialize().timeout(const Duration(seconds: 5), onTimeout: () {});
+
+      final savedSettings = await StorageService().getSettings();
+
+      final localizationDelegate = await LocalizationDelegate.create(
+        fallbackLocale: 'en',
+        supportedLocales: LanguageUtils.supportedLanguages,
+        basePath: 'assets/translations',
+      ).timeout(const Duration(seconds: 5));
+
+      await localizationDelegate
+          .changeLocale(localeFromString(savedSettings.currentLanguage))
+          .timeout(const Duration(seconds: 3), onTimeout: () {});
+
+      // Orientation lock should not block app startup.
+      unawaited(SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]));
+
+      // Defer potentially slow platform calls.
+      unawaited(TTSService().initialize());
+      unawaited(VocabularyInitializer.initializeDefaultVocabulary());
+
+      return localizationDelegate;
+    } catch (e) {
+      debugPrint('Bootstrap init failed, falling back to English: $e');
+      // Ensure we never block startup; return a minimal delegate.
+      try {
+        return await LocalizationDelegate.create(
+          fallbackLocale: 'en',
+          supportedLocales: const ['en'],
+          basePath: 'assets/translations',
+        ).timeout(const Duration(seconds: 3));
+      } catch (_) {
+        return await LocalizationDelegate.create(
+          fallbackLocale: 'en',
+          supportedLocales: const ['en'],
+          basePath: 'assets/translations',
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<LocalizationDelegate>(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Startup failed.'),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => setState(() => _initFuture = _initialize()),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Starting…'),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        return LocalizedApp(snapshot.data!, const ChinnamApp());
+      },
+    );
+  }
 }
 
 class ChinnamApp extends StatelessWidget {
@@ -68,7 +165,7 @@ class ChinnamApp extends StatelessWidget {
       state: LocalizationProvider.of(context).state,
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => SettingsProvider()),
+          ChangeNotifierProvider(create: (context) => SettingsProvider()..loadSettings()),
           ChangeNotifierProvider(create: (context) => VocabularyProvider()),
           ChangeNotifierProxyProvider2<VocabularyProvider, SettingsProvider, CommunicationProvider>(
             create: (context) {

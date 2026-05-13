@@ -15,13 +15,29 @@ class StorageService {
 
   Database? _database;
   SharedPreferences? _prefs;
+  Future<void>? _initFuture;
 
-  Future<void> initialize() async {  
-    _prefs = await SharedPreferences.getInstance();  
+  Future<void> initialize() {
+    return _initFuture ??= _doInitialize();
+  }
+
+  Future<void> _doInitialize() async {
+    if (_prefs == null) {
+      try {
+        _prefs = await SharedPreferences.getInstance();
+      } catch (e) {
+        debugPrint('SharedPreferences initialization failed (continuing without prefs): $e');
+        _prefs = null;
+      }
+    }
+    if (_database != null) return;
+
     try {
-      await _initDatabase();
+      await _initDatabase().timeout(const Duration(seconds: 5));
     } catch (e) {
-      debugPrint('Database initialization failed: $e');
+      debugPrint('Database initialization failed (continuing with prefs): $e');
+      // Allow retry on next access.
+      _initFuture = null;
     }
   }
 
@@ -110,6 +126,7 @@ class StorageService {
     
     // Fallback to SharedPreferences
     if (_prefs == null) await initialize();
+    if (_prefs == null) return;
     final items = await getAllVocabularyItems();
     final index = items.indexWhere((i) => i.id == item.id);
     
@@ -137,6 +154,7 @@ class StorageService {
     
     // Fallback to SharedPreferences
     if (_prefs == null) await initialize();
+    if (_prefs == null) return [];
     final itemsJson = _prefs!.getString('vocabulary_items');
     if (itemsJson == null) return [];
     
@@ -172,6 +190,7 @@ class StorageService {
     
     // Fallback to SharedPreferences
     if (_prefs == null) await initialize();
+    if (_prefs == null) return;
     final items = await getAllVocabularyItems();
     items.removeWhere((item) => item.id == id);
     final itemsJson = items.map((i) => i.toJson()).toList();
@@ -235,6 +254,7 @@ class StorageService {
     
     // Fallback to SharedPreferences
     if (_prefs == null) await initialize();
+    if (_prefs == null) return;
     final logs = await getUsageLogs();
     logs.add(log);
     
@@ -291,6 +311,7 @@ class StorageService {
     
     // Fallback to SharedPreferences
     if (_prefs == null) await initialize();
+    if (_prefs == null) return [];
     final logsJson = _prefs!.getString('usage_logs');
     if (logsJson == null) return [];
     
@@ -315,11 +336,19 @@ class StorageService {
   // App Settings
   Future<void> saveSettings(AppSettings settings) async {
     if (_prefs == null) await initialize();
+    if (_prefs == null) return;
     await _prefs!.setString('app_settings', jsonEncode(settings.toJson()));
   }
 
   Future<AppSettings> getSettings() async {
-    if (_prefs == null) await initialize();
+    // Never block UI on settings reads. If prefs aren't ready yet, return
+    // defaults and let the caller continue; initialization can complete in
+    // background.
+    if (_prefs == null) {
+      initialize();
+      return AppSettings();
+    }
+    if (_prefs == null) return AppSettings();
     final settingsJson = _prefs!.getString('app_settings');
     if (settingsJson == null) {
       return AppSettings();

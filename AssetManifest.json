@@ -1,0 +1,18 @@
+{
+  "assets/translations/bn.json": ["assets/translations/bn.json"],
+  "assets/translations/en.json": ["assets/translations/en.json"],
+  "assets/translations/gu.json": ["assets/translations/gu.json"],
+  "assets/translations/hi.json": ["assets/translations/hi.json"],
+  "assets/translations/kn.json": ["assets/translations/kn.json"],
+  "assets/translations/ml.json": ["assets/translations/ml.json"],
+  "assets/translations/mr.json": ["assets/translations/mr.json"],
+  "assets/translations/ta.json": ["assets/translations/ta.json"],
+  "assets/translations/te.json": ["assets/translations/te.json"],
+  "assets/images/Dad.jpg": ["assets/images/Dad.jpg"],
+  "assets/images/Eating.jpg": ["assets/images/Eating.jpg"],
+  "assets/images/Hungry.jpg": ["assets/images/Hungry.jpg"],
+  "assets/images/LOGO.png": ["assets/images/LOGO.png"],
+  "assets/images/Mom.jpg": ["assets/images/Mom.jpg"],
+  "assets/images/Running.jpg": ["assets/images/Running.jpg"],
+  "assets/icon/app_icon.png": ["assets/icon/app_icon.png"]
+}
