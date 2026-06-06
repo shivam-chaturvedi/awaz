@@ -75,8 +75,10 @@ class CommunicationProvider with ChangeNotifier {
     // Record usage (async, but don't wait for it to update UI)
     _vocabularyProvider?.recordWordUsage(item.id);
 
-    // Don't auto-speak individual words - let user build sentence first
-    // Auto-speak only when explicitly requested or when sentence is complete
+    // Auto-speak the individual word when pressed
+    if (_settingsProvider?.settings.autoSpeak ?? true) {
+      await speakText(localizedItem.getLabel(languageCode));
+    }
   }
 
   Future<void> addTextToSentence(String text) async {
