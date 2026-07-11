@@ -554,6 +554,46 @@ class _SpeakScreenState extends State<SpeakScreen> {
                   ],
                 ),
               ),
+              _buildCard(
+                step: 5,
+                title: 'Apply to Entire App',
+                accent: Colors.blue.shade100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Set ${LanguageUtils.getLanguageName(_selectedLanguageCode)} as the default language for the entire app. This will translate the interface and vocabulary, and change the default text-to-speech language.',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+                        await changeLocale(context, _selectedLanguageCode);
+                        await settingsProvider.setLanguage(_selectedLanguageCode);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('App language set to ${LanguageUtils.getLanguageName(_selectedLanguageCode)}'),
+                              backgroundColor: Colors.green.shade700,
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.language),
+                      label: const Text(
+                        'Translate Whole App',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade700,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
