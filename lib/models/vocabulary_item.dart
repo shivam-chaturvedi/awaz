@@ -36,6 +36,7 @@ class VocabularyItem {
   VocabularyItem copyWith({
     String? id,
     String? imagePath,
+    bool clearImagePath = false,
     String? imageUrl,
     Map<String, String>? labels,
     String? category,
@@ -50,7 +51,7 @@ class VocabularyItem {
   }) {
     return VocabularyItem(
       id: id ?? this.id,
-      imagePath: imagePath ?? this.imagePath,
+      imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
       imageUrl: imageUrl ?? this.imageUrl,
       labels: labels ?? this.labels,
       category: category ?? this.category,

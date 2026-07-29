@@ -20,11 +20,31 @@ class VocabularyInitializer {
   }
 
   static const Map<String, String> _defaultImagePaths = {
-    'Mom': 'assets/images/Mom.jpg',
-    'Dad': 'assets/images/Dad.jpg',
-    'Eating': 'assets/images/Eating.jpg',
-    'Running': 'assets/images/Running.jpg',
-    'Hungry': 'assets/images/Hungry.jpg',
+    'Yes': 'assets/images/Yes.jpg',
+    'No': 'assets/images/No.jpg',
+    'Hello': 'assets/images/Hello.jpg',
+    'Thank you': 'assets/images/Thank_you.jpg',
+    'Please': 'assets/images/Please.jpg',
+    'What': 'assets/images/What.jpg',
+    'Where': 'assets/images/Where.jpg',
+    'When': 'assets/images/When.jpg',
+    'Why': 'assets/images/Why.jpg',
+    'How': 'assets/images/How.jpg',
+    'I': 'assets/images/I.jpg',
+    'You': 'assets/images/You.jpg',
+    'Eat': 'assets/images/Eat.jpg',
+    'Drink': 'assets/images/Drink.jpg',
+    'Play': 'assets/images/Play.jpg',
+    'Sleep': 'assets/images/Sleep.jpg',
+    'Go': 'assets/images/Go.jpg',
+    'Happy': 'assets/images/Happy.jpg',
+    'Sad': 'assets/images/Sad.jpg',
+    'Angry': 'assets/images/Angry.jpg',
+    'Tired': 'assets/images/Tired.jpg',
+    'Now': 'assets/images/Now.jpg',
+    'Later': 'assets/images/Later.jpg',
+    'Today': 'assets/images/Today.jpg',
+    'Tomorrow': 'assets/images/Tomorrow.jpg',
   };
 
   static Future<void> _ensureDefaults(List<VocabularyItem> existing) async {
@@ -45,9 +65,12 @@ class VocabularyInitializer {
         continue;
       }
 
-      final targetPath = _defaultImagePaths[label];
-      if (targetPath != null && existingItem.imagePath != targetPath) {
-        await _storageService.saveVocabularyItem(existingItem.copyWith(imagePath: targetPath));
+      if (existingItem.colorScheme != defaultItem.colorScheme || 
+          existingItem.imagePath != defaultItem.imagePath) {
+        await _storageService.saveVocabularyItem(existingItem.copyWith(
+          colorScheme: defaultItem.colorScheme,
+          imagePath: defaultItem.imagePath,
+        ));
       }
     }
   }
@@ -58,7 +81,7 @@ class VocabularyInitializer {
         id: _uuid.v4(),
         labels: {'en': 'Yes'},
         category: 'QUICK',
-        colorScheme: VocabularyColorScheme.green,
+        colorScheme: VocabularyColorScheme.red,
         isFrozen: true,
       ),
       VocabularyItem(
@@ -72,95 +95,91 @@ class VocabularyInitializer {
         id: _uuid.v4(),
         labels: {'en': 'Hello'},
         category: 'QUICK',
-        colorScheme: VocabularyColorScheme.blue,
+        colorScheme: VocabularyColorScheme.red,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Thank you'},
         category: 'QUICK',
-        colorScheme: VocabularyColorScheme.green,
+        colorScheme: VocabularyColorScheme.red,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Please'},
         category: 'QUICK',
-        colorScheme: VocabularyColorScheme.blue,
+        colorScheme: VocabularyColorScheme.red,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'What'},
         category: 'QUESTIONS',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.purple,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Where'},
         category: 'QUESTIONS',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.purple,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'When'},
         category: 'QUESTIONS',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.purple,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Why'},
         category: 'QUESTIONS',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.purple,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'How'},
         category: 'QUESTIONS',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.purple,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'I'},
         category: 'PEOPLE',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.green,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'You'},
         category: 'PEOPLE',
-        colorScheme: VocabularyColorScheme.yellow,
+        colorScheme: VocabularyColorScheme.green,
       ),
       VocabularyItem(
         id: _uuid.v4(),
-        imagePath: 'assets/images/Mom.jpg',
         labels: {'en': 'Mom'},
         category: 'PEOPLE',
-        colorScheme: VocabularyColorScheme.pink,
+        colorScheme: VocabularyColorScheme.green,
       ),
       VocabularyItem(
         id: _uuid.v4(),
-        imagePath: 'assets/images/Dad.jpg',
         labels: {'en': 'Dad'},
         category: 'PEOPLE',
-        colorScheme: VocabularyColorScheme.blue,
+        colorScheme: VocabularyColorScheme.green,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Eat'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.orange,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
-        imagePath: 'assets/images/Eating.jpg',
         labels: {'en': 'Eating'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.orange,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
-        imagePath: 'assets/images/Running.jpg',
         labels: {'en': 'Running'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.green,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
@@ -172,19 +191,19 @@ class VocabularyInitializer {
         id: _uuid.v4(),
         labels: {'en': 'Play'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.green,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Sleep'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.purple,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Go'},
         category: 'ACTIONS',
-        colorScheme: VocabularyColorScheme.red,
+        colorScheme: VocabularyColorScheme.blue,
       ),
       VocabularyItem(
         id: _uuid.v4(),
@@ -194,52 +213,51 @@ class VocabularyInitializer {
       ),
       VocabularyItem(
         id: _uuid.v4(),
-        imagePath: 'assets/images/Hungry.jpg',
         labels: {'en': 'Hungry'},
         category: 'FEELINGS',
-        colorScheme: VocabularyColorScheme.red,
+        colorScheme: VocabularyColorScheme.yellow,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Sad'},
         category: 'FEELINGS',
-        colorScheme: VocabularyColorScheme.blue,
+        colorScheme: VocabularyColorScheme.yellow,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Angry'},
         category: 'FEELINGS',
-        colorScheme: VocabularyColorScheme.red,
+        colorScheme: VocabularyColorScheme.yellow,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Tired'},
         category: 'FEELINGS',
-        colorScheme: VocabularyColorScheme.gray,
+        colorScheme: VocabularyColorScheme.yellow,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Now'},
         category: 'TIME',
-        colorScheme: VocabularyColorScheme.brown,
+        colorScheme: VocabularyColorScheme.pink,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Later'},
         category: 'TIME',
-        colorScheme: VocabularyColorScheme.brown,
+        colorScheme: VocabularyColorScheme.pink,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Today'},
         category: 'TIME',
-        colorScheme: VocabularyColorScheme.brown,
+        colorScheme: VocabularyColorScheme.pink,
       ),
       VocabularyItem(
         id: _uuid.v4(),
         labels: {'en': 'Tomorrow'},
         category: 'TIME',
-        colorScheme: VocabularyColorScheme.brown,
+        colorScheme: VocabularyColorScheme.pink,
       ),
     ];
   }

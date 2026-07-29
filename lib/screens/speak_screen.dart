@@ -5,6 +5,7 @@ import 'package:speech_recognition/speech_recognition.dart';
 import '../services/tts_service.dart';
 import '../services/translation_service.dart';
 import '../providers/settings_provider.dart';
+import '../providers/vocabulary_provider.dart';
 import '../utils/language_utils.dart';
 
 const _cardBackgroundColor = Color(0xFF1B1B1F);
@@ -28,6 +29,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
   bool _isListening = false;
   bool _isTranslating = false;
   bool _isPlaying = false;
+  bool _isTranslatingWholeApp = false;
   String _recognizedText = '';
   String _translatedText = '';
   String _statusMessage = 'Tap the mic to start speaking';
@@ -232,7 +234,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
               shape: BoxShape.circle,
               color: Color(0x80FFFFFF),
             ),
-            child: const Icon(Icons.translate, color: Colors.white, size: 28),
+            child: const Icon(Icons.translate_rounded, color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -275,7 +277,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: Colors.amber.shade300,
-                  child: const Icon(Icons.edit, color: Colors.white, size: 18),
+                  child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -318,7 +320,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
-                        : const Icon(Icons.swap_horiz),
+                        : const Icon(Icons.swap_horiz_rounded),
                     label: Text(
                       _isTranslating ? 'Converting...' : translate('speak.manual_input_button'),
                       style: const TextStyle(color: Colors.white),
@@ -399,7 +401,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _isListening ? Icons.mic_off : Icons.mic,
+                                _isListening ? Icons.mic_off_rounded : Icons.mic_rounded,
                                 color: Colors.white,
                                 size: 28,
                               ),
@@ -456,7 +458,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                               width: 18,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : const Icon(Icons.translate),
+                          : const Icon(Icons.translate_rounded),
                     label: Text(
                       _isTranslating ? 'Translating...' : 'Transcribe & Translate',
                       style: const TextStyle(color: Colors.white),
@@ -539,7 +541,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                               width: 18,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : const Icon(Icons.play_circle),
+                          : const Icon(Icons.play_circle_rounded),
                       label: Text(
                         _isPlaying 
                             ? 'Playing ${LanguageUtils.getLanguageName(_selectedLanguageCode)} audio' 
@@ -567,23 +569,49 @@ class _SpeakScreenState extends State<SpeakScreen> {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: () async {
-                        final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-                        await changeLocale(context, _selectedLanguageCode);
-                        await settingsProvider.setLanguage(_selectedLanguageCode);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('App language set to ${LanguageUtils.getLanguageName(_selectedLanguageCode)}'),
-                              backgroundColor: Colors.green.shade700,
-                            ),
-                          );
+                      onPressed: _isTranslatingWholeApp ? null : () async {
+                        setState(() => _isTranslatingWholeApp = true);
+                        try {
+                          final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+                          final vocabularyProvider = Provider.of<VocabularyProvider>(context, listen: false);
+                          
+                          // First, set the app locale
+                          await changeLocale(context, _selectedLanguageCode);
+                          await settingsProvider.setLanguage(_selectedLanguageCode);
+                          
+                          // Now translate all the vocabulary in the background
+                          await vocabularyProvider.translateAllVocabulary(_selectedLanguageCode);
+                          
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('App language and vocabulary set to ${LanguageUtils.getLanguageName(_selectedLanguageCode)}'),
+                                backgroundColor: Colors.green.shade700,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to set language: ${e.toString()}')),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isTranslatingWholeApp = false);
+                          }
                         }
                       },
-                      icon: const Icon(Icons.language),
-                      label: const Text(
-                        'Translate Whole App',
-                        style: TextStyle(color: Colors.white),
+                      icon: _isTranslatingWholeApp
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.language_rounded),
+                      label: Text(
+                        _isTranslatingWholeApp ? 'Translating App...' : 'Translate Whole App',
+                        style: const TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade700,

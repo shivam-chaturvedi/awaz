@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/vocabulary_item.dart';
 import '../services/storage_service.dart';
+import '../services/translation_service.dart';
 
 class VocabularyProvider with ChangeNotifier {
   final StorageService _storageService = StorageService();
+  final TranslationService _translationService = TranslationService();
   List<VocabularyItem> _vocabularyItems = [];
   List<VocabularyItem> _recentWords = [];
   String? _currentCategory;
@@ -127,5 +129,32 @@ class VocabularyProvider with ChangeNotifier {
 
   List<String> getCategories() {
     return _vocabularyItems.map((item) => item.category).toSet().toList();
+  }
+
+  Future<void> translateAllVocabulary(String targetLanguage) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final items = await _storageService.getAllVocabularyItems();
+      for (var item in items) {
+        final baseLabel = item.labels['en'] ?? item.labels.values.firstWhere((_) => true, orElse: () => '');
+        if (baseLabel.isNotEmpty) {
+          final translated = await _translationService.translate(
+            text: baseLabel,
+            targetLanguage: targetLanguage,
+          );
+          final newLabels = Map<String, String>.from(item.labels);
+          newLabels[targetLanguage] = translated;
+          await _storageService.saveVocabularyItem(item.copyWith(labels: newLabels));
+        }
+      }
+      await loadVocabularyItems(category: _currentCategory);
+    } catch (e) {
+      debugPrint('Error translating vocabulary: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

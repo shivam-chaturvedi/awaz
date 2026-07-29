@@ -97,14 +97,14 @@ class SentenceBar extends StatelessWidget {
                     // Backspace button
                     IconButton(
                       onPressed: () => communicationProvider.removeLastWord(),
-                      icon: const Icon(Icons.backspace),
+                      icon: const Icon(Icons.backspace_rounded),
                       tooltip: 'Remove last word',
                       color: Colors.orange,
                     ),
                     // Speak button
                     IconButton(
                       onPressed: () => communicationProvider.speakCurrentSentence(),
-                      icon: const Icon(Icons.volume_up),
+                      icon: const Icon(Icons.volume_up_rounded),
                       tooltip: 'Speak sentence',
                       color: Colors.green,
                       iconSize: 28,
@@ -115,7 +115,7 @@ class SentenceBar extends StatelessWidget {
                     onPressed: () {
                       communicationProvider.clearSentence();
                     },
-                    icon: const Icon(Icons.clear_all),
+                    icon: const Icon(Icons.clear_all_rounded),
                     tooltip: 'Clear sentence',
                     color: Colors.red,
                     iconSize: 28,
@@ -153,7 +153,7 @@ class _WordChip extends StatelessWidget {
           word,
           style: TextStyle(fontSize: 16.0 * iconSize, fontWeight: FontWeight.bold),
         ),
-        deleteIcon: const Icon(Icons.close, size: 18),
+        deleteIcon: const Icon(Icons.close_rounded, size: 18),
         onDeleted: onTap,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         padding: const EdgeInsets.symmetric(horizontal: 4.0),

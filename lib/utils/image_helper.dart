@@ -7,6 +7,6 @@ Widget buildImageFromPath(String imagePath, {double? height, double? width}) {
     height: height,
     width: width,
     fit: BoxFit.contain,
-    errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),
+    errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_rounded),
   );
 }

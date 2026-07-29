@@ -118,7 +118,7 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.grid_off, size: 64, color: Colors.grey),
+            const Icon(Icons.grid_off_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               'No vocabulary items yet',

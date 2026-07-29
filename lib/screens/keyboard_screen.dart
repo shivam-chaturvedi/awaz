@@ -32,7 +32,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
       appBar: AppBar(
         title: const Text('Keyboard Mode'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -56,7 +56,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.send),
+                        icon: const Icon(Icons.send_rounded),
                         onPressed: () {
                           final text = _textController.text.trim();
                           if (text.isNotEmpty) {

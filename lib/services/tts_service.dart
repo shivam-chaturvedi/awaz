@@ -9,6 +9,7 @@ class TTSService {
   bool _isInitialized = false;
   String _currentLanguage = 'en';
   Future<void>? _initFuture;
+  Future<void> _speakFuture = Future.value();
 
   Future<void> initialize() {
     if (_isInitialized) return Future.value();
@@ -21,6 +22,7 @@ class TTSService {
       await _flutterTts.setSpeechRate(0.5);
       await _flutterTts.setVolume(1.0);
       await _flutterTts.setPitch(1.0);
+      await _flutterTts.awaitSpeakCompletion(true);
       _isInitialized = true;
     } catch (e) {
       debugPrint('TTS: initialize failed: $e');
@@ -29,6 +31,7 @@ class TTSService {
   }
 
   Future<void> setLanguage(String languageCode) async {
+    await initialize();
     _currentLanguage = languageCode;
     
     // Map language codes to TTS language codes
@@ -72,6 +75,7 @@ class TTSService {
   }
 
   Future<void> setSpeechRate(double rate) async {
+    await initialize();
     try {
       await _flutterTts.setSpeechRate(rate.clamp(0.0, 1.0));
     } catch (e) {
@@ -80,6 +84,7 @@ class TTSService {
   }
 
   Future<void> setPitch(double pitch) async {
+    await initialize();
     try {
       await _flutterTts.setPitch(pitch.clamp(0.5, 2.0));
     } catch (e) {
@@ -92,11 +97,17 @@ class TTSService {
     
     await initialize();
     debugPrint('TTS: Speaking text in language $_currentLanguage: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
-    try {
-      await _flutterTts.speak(text);
-    } catch (e) {
-      debugPrint('TTS: speak failed: $e');
-    }
+    
+    _speakFuture = _speakFuture.then((_) async {
+      try {
+        await _flutterTts.setLanguage(_getTTSLanguageCode(_currentLanguage));
+        await _flutterTts.speak(text);
+      } catch (e) {
+        debugPrint('TTS: speak failed: $e');
+      }
+    });
+    
+    return _speakFuture;
   }
 
   Future<void> stop() async {

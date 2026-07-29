@@ -53,7 +53,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _showAddVocabularyDialog(vocabularyProvider, settings),
-          child: const Icon(Icons.add),
+          child: const Icon(Icons.add_rounded),
           tooltip: 'Add Vocabulary Item',
         ),
       ),
@@ -81,9 +81,9 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                       width: 50,
                       height: 50,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.image),
+                          const Icon(Icons.image_rounded),
                     )
-                  : const Icon(Icons.image),
+                  : const Icon(Icons.image_rounded),
               title: Text(item.getLabel(settings.currentLanguage)),
               subtitle: Text('Category: ${item.category}'),
               trailing: Row(
@@ -92,7 +92,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                   Text('Taps: ${item.tapCount}'),
                   const SizedBox(width: 12),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(Icons.delete_rounded),
                     onPressed: () => _deleteVocabularyItem(
                       vocabularyProvider,
                       item.id,
@@ -185,7 +185,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         const SizedBox(height: 16),
         Card(
           child: ListTile(
-            leading: const Icon(Icons.file_download),
+            leading: const Icon(Icons.file_download_rounded),
             title: const Text('Export All Data'),
             subtitle: const Text('Export vocabulary, usage logs, and settings'),
             onTap: () => _exportData(),
@@ -193,7 +193,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         ),
         Card(
           child: ListTile(
-            leading: const Icon(Icons.file_upload),
+            leading: const Icon(Icons.file_upload_rounded),
             title: const Text('Import Data'),
             subtitle: const Text('Import from backup file'),
             onTap: () => _importData(),
@@ -283,7 +283,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                   if (selectedImagePath != null)
                     _buildImagePreview(selectedImagePath!),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.image),
+                    icon: const Icon(Icons.image_rounded),
                     label: const Text('Select Image'),
                     onPressed: () async {
                       final image = await _imagePicker.pickImage(

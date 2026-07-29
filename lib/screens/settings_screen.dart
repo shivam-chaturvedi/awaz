@@ -35,7 +35,7 @@ class _SettingsTabState extends State<SettingsTab> {
           ListTile(
             title: Text(translate('settings.language')),
             subtitle: Text(LanguageUtils.getLanguageName(settings.currentLanguage)),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios_rounded),
             onTap: () => _showLanguageDialog(settingsProvider),
           ),
           const Divider(),
@@ -44,7 +44,7 @@ class _SettingsTabState extends State<SettingsTab> {
           ListTile(
             title: Text(translate('settings.theme')),
             subtitle: Text(_getThemeName(settings.themeMode)),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios_rounded),
             onTap: () => _showThemeDialog(settingsProvider),
           ),
           const Divider(),
@@ -53,7 +53,7 @@ class _SettingsTabState extends State<SettingsTab> {
           ListTile(
             title: Text(translate('settings.grid_layout')),
             subtitle: Text('${settings.gridRows} x ${settings.gridColumns}'),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios_rounded),
             onTap: () => _showGridLayoutDialog(settingsProvider, settings),
           ),
           const Divider(),
@@ -106,7 +106,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ListTile(
                     title: Text(translate('settings.privacy_policy')),
                     subtitle: Text(translate('settings.privacy_policy_desc')),
-                    trailing: const Icon(Icons.arrow_forward_ios),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -120,7 +120,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ListTile(
                     title: Text(translate('settings.terms_of_service')),
                     subtitle: Text(translate('settings.terms_of_service_desc')),
-                    trailing: const Icon(Icons.arrow_forward_ios),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded),
                     onTap: () {
                       Navigator.push(
                         context,

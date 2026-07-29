@@ -222,12 +222,12 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.photo_library),
+                  icon: const Icon(Icons.photo_library_rounded),
                   label: const Text('Gallery'),
                   onPressed: () => _pickImage(ImageSource.gallery),
                 ),
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.camera_alt),
+                  icon: const Icon(Icons.camera_alt_rounded),
                   label: const Text('Camera'),
                   onPressed: () => _pickImage(ImageSource.camera),
                 ),

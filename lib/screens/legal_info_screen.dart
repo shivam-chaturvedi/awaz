@@ -273,7 +273,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          icon: const Icon(Icons.open_in_new),
+          icon: const Icon(Icons.open_in_new_rounded),
           label: const Text('View Privacy Policy'),
           onPressed: () => _openPrivacyPolicyUrl(context),
         ),

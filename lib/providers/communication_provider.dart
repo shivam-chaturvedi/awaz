@@ -84,9 +84,22 @@ class CommunicationProvider with ChangeNotifier {
   Future<void> addTextToSentence(String text) async {
     // Create a temporary vocabulary item for typed text
     final languageCode = _settingsProvider?.settings.currentLanguage ?? 'en';
+    String translatedText = text;
+
+    if (languageCode != 'en' && text.trim().isNotEmpty) {
+      try {
+        translatedText = await TranslationService().translate(
+          text: text,
+          targetLanguage: languageCode,
+        );
+      } catch (e) {
+        debugPrint('Translation failed in addTextToSentence: $e');
+      }
+    }
+
     final item = VocabularyItem(
       id: _uuid.v4(),
-      labels: {languageCode: text},
+      labels: {languageCode: translatedText},
       category: 'TYPED',
     );
     _currentSentence = [..._currentSentence, item];

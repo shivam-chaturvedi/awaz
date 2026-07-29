@@ -28,19 +28,19 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
 
   List<BottomNavigationBarItem> get _navItems => [
     BottomNavigationBarItem(
-      icon: const Icon(Icons.chat_bubble_outline),
+      icon: const Icon(Icons.chat_bubble_outline_rounded),
       label: translate('tabs.communicate'),
     ),
     BottomNavigationBarItem(
-      icon: const Icon(Icons.mic),
+      icon: const Icon(Icons.mic_rounded),
       label: translate('tabs.speak'),
     ),
     BottomNavigationBarItem(
-      icon: const Icon(Icons.add_photo_alternate_outlined),
+      icon: const Icon(Icons.add_photo_alternate_rounded),
       label: translate('tabs.custom'),
     ),
     BottomNavigationBarItem(
-      icon: const Icon(Icons.settings_outlined),
+      icon: const Icon(Icons.settings_rounded),
       label: translate('tabs.settings'),
     ),
   ];
@@ -95,15 +95,15 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
               if (_currentIndex == 0)
                 IconButton(
                   icon: Icon(communicationProvider.isKeyboardMode
-                      ? Icons.grid_view
-                      : Icons.keyboard),
+                      ? Icons.grid_view_rounded
+                      : Icons.keyboard_rounded),
                   onPressed: () => _openKeyboard(context, communicationProvider),
                   tooltip: communicationProvider.isKeyboardMode
                       ? 'Switch to Picture Mode'
                       : 'Switch to Keyboard Mode',
                 ),
               IconButton(
-                icon: const Icon(Icons.dashboard_outlined),
+                icon: const Icon(Icons.dashboard_rounded),
                 onPressed: () => _openCaregiverDashboard(context),
                 tooltip: 'Caregiver Dashboard',
               ),

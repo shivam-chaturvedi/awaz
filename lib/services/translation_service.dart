@@ -38,11 +38,18 @@ class TranslationService {
 
       final translator = _translators[translatorKey]!;
       
-      // Check if model is downloaded
+      // Check if models are downloaded
       final modelManager = OnDeviceTranslatorModelManager();
       final targetLang = _getTranslateLanguage(targetLanguage);
-      final isDownloaded = await modelManager.isModelDownloaded(targetLang.bcpCode);
+      final sourceLangModel = _getTranslateLanguage(sourceLanguage);
       
+      final isSourceDownloaded = await modelManager.isModelDownloaded(sourceLangModel.bcpCode);
+      if (!isSourceDownloaded) {
+        debugPrint('Translation: Downloading model for $sourceLanguage...');
+        await modelManager.downloadModel(sourceLangModel.bcpCode);
+      }
+
+      final isDownloaded = await modelManager.isModelDownloaded(targetLang.bcpCode);
       if (!isDownloaded) {
         debugPrint('Translation: Downloading model for $targetLanguage...');
         await modelManager.downloadModel(targetLang.bcpCode);

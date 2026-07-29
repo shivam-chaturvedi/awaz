@@ -135,7 +135,7 @@ class VocabularyGridItem extends StatelessWidget {
         imageUrl: item.imageUrl!,
         fit: BoxFit.contain,
         placeholder: (context, url) => const CircularProgressIndicator(),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
+        errorWidget: (context, url, error) => const Icon(Icons.error_rounded),
       );
     } else if (item.imagePath != null) {
       // Local image
@@ -143,7 +143,7 @@ class VocabularyGridItem extends StatelessWidget {
         return Image.asset(
           item.imagePath!,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),
+          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_rounded),
         );
       } else {
         // File path - use helper for platform-specific image loading
@@ -174,6 +174,18 @@ class VocabularyGridItem extends StatelessWidget {
       fontSize: 14 * adaptiveScale,
       fontWeight: FontWeight.bold,
     );
+
+    // If we already have the translation in the database, use it directly
+    final translatedLabel = item.labels[languageCode];
+    if (translatedLabel != null && translatedLabel.isNotEmpty) {
+      return Text(
+        translatedLabel,
+        style: textStyle,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
 
     if (languageCode == 'en' || baseLabel.trim().isEmpty) {
       return Text(
@@ -216,29 +228,29 @@ class VocabularyGridItem extends StatelessWidget {
   IconData _getIconForCategory(String category) {
     switch (category.toUpperCase()) {
       case 'QUICK':
-        return Icons.chat_bubble;
+        return Icons.chat_bubble_rounded;
       case 'QUESTIONS':
-        return Icons.help;
+        return Icons.help_rounded;
       case 'PEOPLE':
-        return Icons.people;
+        return Icons.people_rounded;
       case 'ACTIONS':
-        return Icons.directions_run;
+        return Icons.directions_run_rounded;
       case 'FEELINGS':
-        return Icons.sentiment_satisfied;
+        return Icons.sentiment_satisfied_rounded;
       case 'TIME':
-        return Icons.access_time;
+        return Icons.access_time_rounded;
       case 'PLACES':
-        return Icons.place;
+        return Icons.place_rounded;
       case 'FOOD':
-        return Icons.restaurant;
+        return Icons.restaurant_rounded;
       case 'ANIMALS':
-        return Icons.pets;
+        return Icons.pets_rounded;
       case 'CLOTHES':
-        return Icons.checkroom;
+        return Icons.checkroom_rounded;
       case 'BODY PARTS':
-        return Icons.face;
+        return Icons.face_rounded;
       default:
-        return Icons.tag;
+        return Icons.tag_rounded;
     }
   }
 }
