@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/communication_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/translation_service.dart';
 
 class SentenceBar extends StatelessWidget {
   const SentenceBar({super.key});
@@ -38,7 +39,10 @@ class SentenceBar extends StatelessWidget {
                     ? Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          'Tap words to build a sentence...',
+                          TranslationService.getBuiltInTranslation(
+                            'Tap words to build a sentence...',
+                            settings.currentLanguage,
+                          ),
                           style: TextStyle(
                             fontSize: 18.0 * settings.iconSize,
                             color: Theme.of(context).hintColor,

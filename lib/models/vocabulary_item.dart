@@ -1,3 +1,5 @@
+import '../services/translation_service.dart';
+
 class VocabularyItem {
   final String id;
   final String? imagePath; // Local path or asset path
@@ -30,7 +32,10 @@ class VocabularyItem {
   });
 
   String getLabel(String languageCode) {
-    return labels[languageCode] ?? labels['en'] ?? '';
+    final stored = labels[languageCode];
+    if (stored != null && stored.isNotEmpty) return stored;
+    final baseLabel = labels['en'] ?? (labels.isNotEmpty ? labels.values.first : '');
+    return TranslationService.getBuiltInTranslation(baseLabel, languageCode);
   }
 
   VocabularyItem copyWith({

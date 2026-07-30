@@ -117,12 +117,12 @@ class VocabularyProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      if (category != null) {
+      if (category != null && category != 'All') {
         _vocabularyItems = await _storageService.getVocabularyItemsByCategory(category);
         _currentCategory = category;
       } else {
         _vocabularyItems = await _storageService.getAllVocabularyItems();
-        _currentCategory = null;
+        _currentCategory = category;
       }
       _vocabularyItems = _applyPriorityOrder(_vocabularyItems);
       

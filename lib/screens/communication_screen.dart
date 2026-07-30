@@ -9,6 +9,7 @@ import '../models/app_settings.dart';
 import '../widgets/vocabulary_grid_item.dart';
 import '../widgets/frozen_row.dart';
 import '../widgets/sentence_bar.dart';
+import '../services/translation_service.dart';
 
 class CommunicationScreen extends StatefulWidget {
   const CommunicationScreen({super.key});
@@ -76,7 +77,7 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
 
               // Category breadcrumb/back row
               if (_selectedCategory != null)
-                _buildBreadcrumb(_selectedCategory!),
+                _buildBreadcrumb(_selectedCategory!, settings.currentLanguage),
 
               Expanded(
                 child: vocabularyProvider.isLoading
@@ -98,7 +99,9 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
 
   // ─── Breadcrumb bar ──────────────────────────────────────────────────────────
 
-  Widget _buildBreadcrumb(String category) {
+  Widget _buildBreadcrumb(String category, String languageCode) {
+    final translatedCategory = TranslationService.getBuiltInTranslation(category, languageCode);
+    final backTooltip = TranslationService.getBuiltInTranslation('Back to groups', languageCode);
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -107,11 +110,11 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => _selectCategory(null),
-            tooltip: 'Back to groups',
+            tooltip: backTooltip,
           ),
           const SizedBox(width: 4),
           Text(
-            category,
+            translatedCategory,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -187,11 +190,10 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
                 final icon = _iconForGroup(tile.index);
                 return _GroupTileWidget(
                   label: tile.label,
+                  currentLanguage: settings.currentLanguage,
                   color: color,
                   icon: icon,
-                  onTap: () => _selectCategory(
-                    tile.label == 'All' ? null : tile.label,
-                  ),
+                  onTap: () => _selectCategory(tile.label),
                 );
               },
             );
@@ -281,12 +283,13 @@ class _CommunicationScreenState extends State<CommunicationScreen> {
               onTap: () async {
                 final messenger = ScaffoldMessenger.of(context);
                 final label = item.getLabel(settings.currentLanguage);
+                final addedPrefix = TranslationService.getBuiltInTranslation('Added: ', settings.currentLanguage);
                 await communicationProvider.addWordToSentence(item);
                 if (!mounted) return;
                 messenger.hideCurrentSnackBar();
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('Added: $label'),
+                    content: Text('$addedPrefix$label'),
                     duration: const Duration(milliseconds: 500),
                     behavior: SnackBarBehavior.floating,
                   ),
@@ -312,12 +315,14 @@ class _GroupTile {
 
 class _GroupTileWidget extends StatefulWidget {
   final String label;
+  final String currentLanguage;
   final Color color;
   final IconData icon;
   final VoidCallback onTap;
 
   const _GroupTileWidget({
     required this.label,
+    required this.currentLanguage,
     required this.color,
     required this.icon,
     required this.onTap,
@@ -353,6 +358,8 @@ class _GroupTileWidgetState extends State<_GroupTileWidget>
 
   @override
   Widget build(BuildContext context) {
+    final translatedLabel = TranslationService.getBuiltInTranslation(widget.label, widget.currentLanguage);
+
     return GestureDetector(
       onTapDown: (_) => _controller.reverse(),
       onTapUp: (_) {
@@ -382,7 +389,7 @@ class _GroupTileWidgetState extends State<_GroupTileWidget>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  widget.label,
+                  translatedLabel,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

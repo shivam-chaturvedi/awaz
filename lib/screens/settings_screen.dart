@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/settings_provider.dart';
+import '../providers/vocabulary_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
 import 'legal_info_screen.dart';
@@ -142,7 +143,7 @@ class _SettingsTabState extends State<SettingsTab> {
   void _showLanguageDialog(SettingsProvider settingsProvider) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(translate('settings.language')),
         content: SingleChildScrollView(
           child: Column(
@@ -153,7 +154,13 @@ class _SettingsTabState extends State<SettingsTab> {
                 onTap: () async {
                   await changeLocale(context, langCode);
                   await settingsProvider.setLanguage(langCode);
-                  Navigator.pop(context);
+                  if (mounted) {
+                    final vocabProvider = Provider.of<VocabularyProvider>(context, listen: false);
+                    vocabProvider.translateAllVocabulary(langCode);
+                  }
+                  if (dialogContext.mounted) {
+                    Navigator.pop(dialogContext);
+                  }
                 },
               );
             }).toList(),
