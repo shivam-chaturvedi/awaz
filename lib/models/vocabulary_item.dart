@@ -118,6 +118,7 @@ enum VocabularyColorScheme {
   lightBlue,
   pink,
   gray,
+  black,
 }
 
 VocabularyColorScheme? _colorSchemeFromString(String? value) {

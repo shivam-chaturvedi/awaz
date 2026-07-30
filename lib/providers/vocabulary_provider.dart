@@ -10,6 +10,17 @@ class VocabularyProvider with ChangeNotifier {
   List<VocabularyItem> _recentWords = [];
   String? _currentCategory;
   bool _isLoading = false;
+  List<String> _customGroups = [];
+
+  static const List<String> builtInGroups = [
+    'QUICK',
+    'ACTIONS',
+    'FEELINGS',
+    'PEOPLE',
+    'QUESTIONS',
+    'TIME',
+  ];
+
   static const List<String> _priorityLabels = [
     'Yes',
     'No',
@@ -19,6 +30,17 @@ class VocabularyProvider with ChangeNotifier {
     'Mom',
     'Dad',
   ];
+
+  List<String> get customGroups => List.unmodifiable(_customGroups);
+
+  /// All groups: built-in + custom (deduped).
+  List<String> get allGroups {
+    final result = <String>[...builtInGroups];
+    for (final g in _customGroups) {
+      if (!result.contains(g)) result.add(g);
+    }
+    return result;
+  }
 
   List<VocabularyItem> _applyPriorityOrder(List<VocabularyItem> items) {
     final prioritized = [...items];
@@ -47,6 +69,48 @@ class VocabularyProvider with ChangeNotifier {
   List<VocabularyItem> get recentWords => _recentWords;
   String? get currentCategory => _currentCategory;
   bool get isLoading => _isLoading;
+
+  Future<void> loadCustomGroups() async {
+    try {
+      _customGroups = await _storageService.getCustomGroups();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading custom groups: $e');
+    }
+  }
+
+  Future<void> addCustomGroup(String name) async {
+    final trimmed = name.trim().toUpperCase();
+    if (trimmed.isEmpty) return;
+    if (_customGroups.contains(trimmed)) return;
+    if (builtInGroups.contains(trimmed)) return;
+    _customGroups = [..._customGroups, trimmed];
+    await _storageService.saveCustomGroups(_customGroups);
+    notifyListeners();
+  }
+
+  Future<void> removeCustomGroup(String name) async {
+    _customGroups = _customGroups.where((g) => g != name).toList();
+    await _storageService.saveCustomGroups(_customGroups);
+    notifyListeners();
+  }
+
+  /// Returns all categories that actually have vocabulary items, merged with allGroups.
+  Future<List<String>> getAllCategories() async {
+    try {
+      final items = await _storageService.getAllVocabularyItems();
+      final fromItems = items.map((i) => i.category).toSet();
+      // Keep allGroups order first, then extras at end
+      final ordered = [...allGroups];
+      for (final c in fromItems) {
+        if (!ordered.contains(c)) ordered.add(c);
+      }
+      return ordered;
+    } catch (e) {
+      debugPrint('Error getting all categories: $e');
+      return allGroups;
+    }
+  }
 
   Future<void> loadVocabularyItems({String? category}) async {
     _isLoading = true;

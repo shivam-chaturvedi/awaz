@@ -27,6 +27,8 @@ class ColorUtils {
         return Colors.pink;
       case VocabularyColorScheme.gray:
         return Colors.grey;
+      case VocabularyColorScheme.black:
+        return Colors.black;
     }
   }
 

@@ -356,6 +356,19 @@ class StorageService {
     return AppSettings.fromJson(jsonDecode(settingsJson));
   }
 
+  // Custom Groups
+  Future<void> saveCustomGroups(List<String> groups) async {
+    if (_prefs == null) await initialize();
+    if (_prefs == null) return;
+    await _prefs!.setStringList('custom_groups', groups);
+  }
+
+  Future<List<String>> getCustomGroups() async {
+    if (_prefs == null) await initialize();
+    if (_prefs == null) return [];
+    return _prefs!.getStringList('custom_groups') ?? [];
+  }
+
   // Export/Backup
   Future<Map<String, dynamic>> exportAllData() async {
     final vocabularyItems = await getAllVocabularyItems();

@@ -77,7 +77,10 @@ class VocabularyGridItem extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: _buildImage(adaptiveIconScale),
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: _buildImage(adaptiveIconScale),
+                      ),
                     ),
                   ),
                   if (showTextLabels) ...[
@@ -94,23 +97,27 @@ class VocabularyGridItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                _buildLabelText(
-                                  baseLabel,
-                                  currentLanguage,
-                                  textColor,
-                                  adaptiveIconScale,
+                                Flexible(
+                                  child: _buildLabelText(
+                                    baseLabel,
+                                    currentLanguage,
+                                    textColor,
+                                    adaptiveIconScale,
+                                  ),
                                 ),
                                 if ((detailText ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    detailText!,
-                                    style: TextStyle(
-                                      color: textColor.withAlpha(217),
-                                      fontSize: 10 * adaptiveIconScale,
+                                  const SizedBox(height: 2),
+                                  Flexible(
+                                    child: Text(
+                                      detailText!,
+                                      style: TextStyle(
+                                        color: textColor.withAlpha(217),
+                                        fontSize: 10 * adaptiveIconScale,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ],
