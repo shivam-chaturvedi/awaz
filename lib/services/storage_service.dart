@@ -48,7 +48,7 @@ class StorageService {
 
       _database = await openDatabase(
         dbPath,
-        version: 1,
+        version: 2,
         onCreate: (db, version) async {
           // Vocabulary items table
           await db.execute('''
@@ -65,7 +65,8 @@ class StorageService {
               is_favorite INTEGER,
               color_scheme TEXT,
               grid_position INTEGER,
-              is_frozen INTEGER
+              is_frozen INTEGER,
+              custom_audio_path TEXT
             )
           ''');
 
@@ -85,6 +86,11 @@ class StorageService {
           // Create indexes
           await db.execute('CREATE INDEX idx_category ON vocabulary_items(category)');
           await db.execute('CREATE INDEX idx_timestamp ON usage_logs(timestamp)');
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            await db.execute('ALTER TABLE vocabulary_items ADD COLUMN custom_audio_path TEXT');
+          }
         },
       );
     } catch (e) {
@@ -115,6 +121,7 @@ class StorageService {
             'color_scheme': item.colorScheme.toString().split('.').last,
             'grid_position': item.gridPosition,
             'is_frozen': item.isFrozen ? 1 : 0,
+            'custom_audio_path': item.customAudioPath,
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
@@ -226,6 +233,7 @@ class StorageService {
       ),
       gridPosition: map['grid_position'] as int?,
       isFrozen: (map['is_frozen'] as int) == 1,
+      customAudioPath: map['custom_audio_path'] as String?,
     );
   }
 

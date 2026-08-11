@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 import '../models/vocabulary_item.dart';
 import '../models/usage_log.dart';
 import '../services/storage_service.dart';
 import '../services/translation_service.dart';
 import '../services/tts_service.dart';
+import '../services/audio_recording_service.dart';
 import 'vocabulary_provider.dart';
 import 'settings_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -11,6 +13,7 @@ import 'package:uuid/uuid.dart';
 class CommunicationProvider with ChangeNotifier {
   final StorageService _storageService = StorageService();
   final TTSService _ttsService = TTSService();
+  final AudioRecordingService _audioRecordingService = AudioRecordingService();
   VocabularyProvider? _vocabularyProvider;
   SettingsProvider? _settingsProvider;
   final Uuid _uuid = const Uuid();
@@ -77,7 +80,14 @@ class CommunicationProvider with ChangeNotifier {
 
     // Auto-speak the individual word when pressed
     if (_settingsProvider?.settings.autoSpeak ?? true) {
-      await speakText(localizedItem.getLabel(languageCode));
+      // If the item has a custom audio recording, play that instead of TTS
+      if (localizedItem.customAudioPath != null &&
+          localizedItem.customAudioPath!.isNotEmpty &&
+          await File(localizedItem.customAudioPath!).exists()) {
+        await _audioRecordingService.playRecording(localizedItem.customAudioPath!);
+      } else {
+        await speakText(localizedItem.getLabel(languageCode));
+      }
     }
   }
 

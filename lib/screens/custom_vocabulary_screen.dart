@@ -7,6 +7,8 @@ import '../providers/vocabulary_provider.dart';
 import '../providers/settings_provider.dart';
 import '../utils/color_utils.dart';
 import '../utils/image_helper.dart';
+import '../services/audio_recording_service.dart';
+import '../widgets/image_search_dialog.dart';
 
 class CustomVocabularyScreen extends StatefulWidget {
   const CustomVocabularyScreen({super.key});
@@ -23,10 +25,14 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
   final _newGroupController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   final Uuid _uuid = const Uuid();
+  final AudioRecordingService _audioService = AudioRecordingService();
 
   String _selectedCategory = 'CUSTOM';
   VocabularyColorScheme _selectedColor = VocabularyColorScheme.blue;
   String? _selectedImagePath;
+  String? _recordedAudioPath;
+  bool _isRecordingAudio = false;
+  bool _isPlayingPreview = false;
   bool _saving = false;
 
   @override
@@ -43,6 +49,7 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
     _detailController.dispose();
     _speechController.dispose();
     _newGroupController.dispose();
+    _audioService.stopPlayback();
     super.dispose();
   }
 
@@ -81,6 +88,7 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
       labels: labels,
       category: _selectedCategory,
       colorScheme: _selectedColor,
+      customAudioPath: _recordedAudioPath,
     );
 
     await vocabularyProvider.addVocabularyItem(item);
@@ -88,6 +96,9 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
 
     setState(() {
       _selectedImagePath = null;
+      _recordedAudioPath = null;
+      _isRecordingAudio = false;
+      _isPlayingPreview = false;
       _saving = false;
       _titleController.clear();
       _detailController.clear();
@@ -111,6 +122,105 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Group "$name" created')),
+    );
+  }
+
+  Widget _buildRecordingSection() {
+    final theme = Theme.of(context);
+
+    if (_recordedAudioPath != null) {
+      // Recording exists — show playback & remove controls
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer.withAlpha(40),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.primary.withAlpha(80)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.mic_rounded, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Voice recording saved',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                _isPlayingPreview ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                color: theme.colorScheme.primary,
+              ),
+              tooltip: _isPlayingPreview ? 'Stop' : 'Play preview',
+              onPressed: () async {
+                if (_isPlayingPreview) {
+                  await _audioService.stopPlayback();
+                  setState(() => _isPlayingPreview = false);
+                } else {
+                  setState(() => _isPlayingPreview = true);
+                  await _audioService.playRecording(_recordedAudioPath!);
+                  // Auto-reset after playback finishes (short delay for safety)
+                  await Future.delayed(const Duration(seconds: 3));
+                  if (mounted) setState(() => _isPlayingPreview = false);
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_rounded, color: Colors.red),
+              tooltip: 'Remove recording',
+              onPressed: () async {
+                await _audioService.deleteRecording(_recordedAudioPath!);
+                setState(() => _recordedAudioPath = null);
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
+    // No recording yet — show record button
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        icon: Icon(
+          _isRecordingAudio ? Icons.stop_rounded : Icons.mic_rounded,
+          color: _isRecordingAudio ? Colors.red : null,
+        ),
+        label: Text(
+          _isRecordingAudio ? 'Stop Recording' : 'Record Voice',
+          style: _isRecordingAudio ? const TextStyle(color: Colors.red) : null,
+        ),
+        style: _isRecordingAudio
+            ? OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red, width: 2),
+              )
+            : null,
+        onPressed: () async {
+          if (_isRecordingAudio) {
+            final path = await _audioService.stopRecording();
+            setState(() {
+              _isRecordingAudio = false;
+              _recordedAudioPath = path;
+            });
+          } else {
+            final fileName = 'tile_${DateTime.now().millisecondsSinceEpoch}';
+            final path = await _audioService.startRecording(fileName);
+            if (path != null) {
+              setState(() => _isRecordingAudio = true);
+            } else {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Microphone permission required')),
+                );
+              }
+            }
+          }
+        },
+      ),
     );
   }
 
@@ -256,8 +366,33 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
                   label: const Text('Camera'),
                   onPressed: () => _pickImage(ImageSource.camera),
                 ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.search_rounded),
+                  label: const Text('Web Search'),
+                  onPressed: () async {
+                    final path = await showDialog<String>(
+                      context: context,
+                      builder: (context) => const ImageSearchDialog(),
+                    );
+                    if (path != null) setState(() => _selectedImagePath = path);
+                  },
+                ),
               ],
             ),
+
+            // ── Voice recording ──────────────────────────────────────────
+            const SizedBox(height: 20),
+            const Text(
+              'Record custom voice (optional)',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Record your own voice for this tile. This recording will play instead of the default text-to-speech voice.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            _buildRecordingSection(),
 
             // ── Save button ──────────────────────────────────────────────
             const SizedBox(height: 24),

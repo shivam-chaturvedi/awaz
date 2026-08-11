@@ -476,7 +476,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                 title: 'Choose Output Language',
                 accent: Colors.orange.shade100,
                 child: DropdownButtonFormField<String>(
-                  value: _selectedLanguageCode,
+                  initialValue: _selectedLanguageCode,
                   dropdownColor: _dropdownBackgroundColor,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -571,10 +571,10 @@ class _SpeakScreenState extends State<SpeakScreen> {
                     ElevatedButton.icon(
                       onPressed: _isTranslatingWholeApp ? null : () async {
                         setState(() => _isTranslatingWholeApp = true);
+                        final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+                        final vocabularyProvider = Provider.of<VocabularyProvider>(context, listen: false);
+                        final messenger = ScaffoldMessenger.of(context);
                         try {
-                          final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-                          final vocabularyProvider = Provider.of<VocabularyProvider>(context, listen: false);
-                          
                           // First, set the app locale
                           await changeLocale(context, _selectedLanguageCode);
                           await settingsProvider.setLanguage(_selectedLanguageCode);
@@ -583,7 +583,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                           await vocabularyProvider.translateAllVocabulary(_selectedLanguageCode);
                           
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text('App language and vocabulary set to ${LanguageUtils.getLanguageName(_selectedLanguageCode)}'),
                                 backgroundColor: Colors.green.shade700,
@@ -592,7 +592,7 @@ class _SpeakScreenState extends State<SpeakScreen> {
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(content: Text('Failed to set language: ${e.toString()}')),
                             );
                           }

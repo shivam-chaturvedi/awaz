@@ -1,10 +1,16 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_translate/flutter_translate.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
 import '../providers/settings_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
+import '../services/storage_service.dart';
 import 'legal_info_screen.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -15,6 +21,8 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
+  final StorageService _storageService = StorageService();
+
   @override
   Widget build(BuildContext context) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
@@ -82,6 +90,96 @@ class _SettingsTabState extends State<SettingsTab> {
                     settings.copyWith(autoSpeak: value),
                   );
                 },
+              ),
+              SwitchListTile(
+                title: const Text('Left-Hand Mode'),
+                subtitle: const Text('Moves primary buttons to the left for easier reach'),
+                value: settings.leftHandMode,
+                onChanged: (value) {
+                  settingsProvider.updateSettings(
+                    settings.copyWith(leftHandMode: value),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.speed_rounded, size: 20),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Voice Speed',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${(settings.speechRate * 10).round()}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Adjust the speed of text-to-speech output',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Row(
+                      children: [
+                        const Text('1', style: TextStyle(fontSize: 12)),
+                        Expanded(
+                          child: Slider(
+                            value: (settings.speechRate * 10).roundToDouble().clamp(1.0, 10.0),
+                            min: 1,
+                            max: 10,
+                            divisions: 9,
+                            label: '${(settings.speechRate * 10).round()}',
+                            onChanged: (value) {
+                              settingsProvider.updateSettings(
+                                settings.copyWith(speechRate: value / 10.0),
+                              );
+                            },
+                          ),
+                        ),
+                        const Text('10', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(),
+
+          // Backup & Transfer
+          ExpansionTile(
+            title: const Text('Backup & Transfer Words'),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.file_download_rounded),
+                title: const Text('Export Data to another device'),
+                subtitle: const Text('Export your custom vocabulary and settings'),
+                onTap: () => _exportData(),
+              ),
+              ListTile(
+                leading: const Icon(Icons.file_upload_rounded),
+                title: const Text('Import Data from device'),
+                subtitle: const Text('Restore vocabulary from a backup file'),
+                onTap: () => _importData(),
               ),
             ],
           ),
@@ -206,8 +304,8 @@ class _SettingsTabState extends State<SettingsTab> {
     int columns = settings.gridColumns;
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) => AlertDialog(
           title: Text(translate('settings.grid_layout')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -245,7 +343,7 @@ class _SettingsTabState extends State<SettingsTab> {
                 if (shouldUpdate) {
                   await settingsProvider.setGridLayout(rows, columns);
                 }
-                Navigator.pop(context);
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
               },
               child: Text(translate('settings.done')),
             ),
@@ -265,6 +363,67 @@ class _SettingsTabState extends State<SettingsTab> {
         return translate('settings.theme_high_contrast');
     }
   }
+
+  Future<void> _exportData() async {
+    try {
+      final data = await _storageService.exportAllData();
+      final jsonString = jsonEncode(data);
+
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File(
+          '${directory.path}/awaz_backup_${DateTime.now().millisecondsSinceEpoch}.json');
+      await file.writeAsString(jsonString);
+
+      if (!mounted) return;
+      await Share.shareXFiles([XFile(file.path)], subject: 'Awaz AAC Backup');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data exported successfully')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error exporting data: $e')),
+      );
+    }
+  }
+
+  Future<void> _importData() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.any,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final jsonString = await file.readAsString();
+        final data = jsonDecode(jsonString) as Map<String, dynamic>;
+
+        await _storageService.importData(data);
+
+        if (!mounted) return;
+
+        // Reload settings and vocabulary
+        final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+        await settingsProvider.loadSettings();
+
+        if (!mounted) return;
+        final vocabProvider = Provider.of<VocabularyProvider>(context, listen: false);
+        await vocabProvider.loadVocabularyItems();
+        await vocabProvider.loadCustomGroups();
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data imported successfully')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error importing data: $e')),
+      );
+    }
+  }
 }
 
 class GridLayoutPreview extends StatelessWidget {
@@ -280,8 +439,8 @@ class GridLayoutPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final previewRows = rows.clamp(1, 5) as int;
-    final previewColumns = columns.clamp(1, 4) as int;
+    final previewRows = rows.clamp(1, 5);
+    final previewColumns = columns.clamp(1, 4);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,10 +453,10 @@ class GridLayoutPreview extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant,
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.dividerColor.withOpacity(0.6),
+              color: theme.dividerColor.withValues(alpha: 0.6),
             ),
           ),
           child: Column(
@@ -312,7 +471,7 @@ class GridLayoutPreview extends StatelessWidget {
                         height: 22,
                         margin: const EdgeInsets.symmetric(horizontal: 3.0),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer.withOpacity(0.6),
+                          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),

@@ -18,6 +18,7 @@ class AppSettings {
   final List<String> favoriteCategories;
   final bool autoSpeak; // Auto speak on selection
   final int maxRecentWords; // For recent words suggestions
+  final bool leftHandMode; // Move buttons to left
 
     AppSettings({
     this.currentLanguage = 'en',
@@ -39,6 +40,7 @@ class AppSettings {
     this.favoriteCategories = const [],
     this.autoSpeak = true,
     this.maxRecentWords = 10,
+    this.leftHandMode = false,
   });
 
   AppSettings copyWith({
@@ -61,6 +63,7 @@ class AppSettings {
     List<String>? favoriteCategories,
     bool? autoSpeak,
     int? maxRecentWords,
+    bool? leftHandMode,
   }) {
     return AppSettings(
       currentLanguage: currentLanguage ?? this.currentLanguage,
@@ -83,6 +86,7 @@ class AppSettings {
       favoriteCategories: favoriteCategories ?? this.favoriteCategories,
       autoSpeak: autoSpeak ?? this.autoSpeak,
       maxRecentWords: maxRecentWords ?? this.maxRecentWords,
+      leftHandMode: leftHandMode ?? this.leftHandMode,
     );
   }
 
@@ -110,6 +114,7 @@ class AppSettings {
           const [],
       autoSpeak: json['autoSpeak'] as bool? ?? true,
       maxRecentWords: json['maxRecentWords'] as int? ?? 10,
+      leftHandMode: json['leftHandMode'] as bool? ?? false,
     );
   }
 
@@ -134,6 +139,7 @@ class AppSettings {
       'favoriteCategories': favoriteCategories,
       'autoSpeak': autoSpeak,
       'maxRecentWords': maxRecentWords,
+      'leftHandMode': leftHandMode,
     };
   }
 }

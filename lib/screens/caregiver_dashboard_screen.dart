@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'dart:convert';
 import 'package:uuid/uuid.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/settings_provider.dart';
 import '../models/vocabulary_item.dart';
 import '../models/app_settings.dart';
 import '../services/storage_service.dart';
+import '../services/audio_recording_service.dart';
 import '../utils/color_utils.dart';
 import '../utils/image_helper.dart';
+import '../widgets/image_search_dialog.dart';
 
 class CaregiverDashboardScreen extends StatefulWidget {
   const CaregiverDashboardScreen({super.key});
@@ -25,6 +23,7 @@ class CaregiverDashboardScreen extends StatefulWidget {
 class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   final StorageService _storageService = StorageService();
+  final AudioRecordingService _audioService = AudioRecordingService();
   final Uuid _uuid = const Uuid();
 
   @override
@@ -41,7 +40,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     final settings = Provider.of<SettingsProvider>(context).settings;
 
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Caregiver Dashboard'),
@@ -49,7 +48,6 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
             tabs: [
               Tab(text: 'Vocabulary'),
               Tab(text: 'Usage Stats'),
-              Tab(text: 'Backup'),
             ],
           ),
         ),
@@ -57,7 +55,6 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
           children: [
             _buildVocabularyTab(vocabularyProvider, settings),
             _buildUsageStatsTab(),
-            _buildBackupTab(),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -177,6 +174,35 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                   onTap: () {
                     Navigator.pop(sheetContext);
                     _showChangeColourDialog(context, vocabularyProvider, item);
+                  },
+                ),
+
+                // ── Change Image
+                ListTile(
+                  leading: const Icon(Icons.image_rounded),
+                  title: const Text('Change Image'),
+                  subtitle: Text(item.imagePath != null ? 'Replace current image' : 'Add an image'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _showChangeImageDialog(context, vocabularyProvider, item);
+                  },
+                ),
+
+                // ── Record Custom Voice
+                ListTile(
+                  leading: Icon(
+                    Icons.mic_rounded,
+                    color: item.customAudioPath != null ? Colors.green : null,
+                  ),
+                  title: const Text('Record Custom Voice'),
+                  subtitle: Text(
+                    item.customAudioPath != null
+                        ? 'Replace or remove existing recording'
+                        : 'Record your voice for this tile',
+                  ),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _showRecordVoiceDialog(context, vocabularyProvider, item);
                   },
                 ),
 
@@ -394,6 +420,276 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     );
   }
 
+  // ─── Change Image dialog ──────────────────────────────────────────────────
+
+  void _showChangeImageDialog(
+    BuildContext context,
+    VocabularyProvider vocabularyProvider,
+    VocabularyItem item,
+  ) {
+    String? selectedImagePath = item.imagePath;
+    bool removeImage = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          title: const Text('Change Image'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '"${item.getLabel('en')}"',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              if (selectedImagePath != null && !removeImage)
+                _buildImagePreview(selectedImagePath!),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.photo_library_rounded),
+                    label: const Text('Gallery'),
+                    onPressed: () async {
+                      final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+                      if (image != null) {
+                        setDlgState(() {
+                          selectedImagePath = image.path;
+                          removeImage = false;
+                        });
+                      }
+                    },
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.search_rounded),
+                    label: const Text('Web Search'),
+                    onPressed: () async {
+                      final path = await showDialog<String>(
+                        context: context,
+                        builder: (context) => const ImageSearchDialog(),
+                      );
+                      if (path != null) {
+                        setDlgState(() {
+                          selectedImagePath = path;
+                          removeImage = false;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+                 const SizedBox(height: 8),
+                 TextButton.icon(
+                   onPressed: () {
+                     setDlgState(() {
+                       removeImage = true;
+                     });
+                   },
+                   icon: const Icon(Icons.delete_rounded, color: Colors.red),
+                   label: const Text('Remove Image', style: TextStyle(color: Colors.red)),
+                 ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final updated = item.copyWith(
+                  imagePath: removeImage ? null : selectedImagePath,
+                  clearImagePath: removeImage,
+                );
+                await vocabularyProvider.updateVocabularyItem(updated);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Image updated for "${item.getLabel('en')}"',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Record Voice dialog ──────────────────────────────────────────────────
+
+  void _showRecordVoiceDialog(
+    BuildContext context,
+    VocabularyProvider vocabularyProvider,
+    VocabularyItem item,
+  ) {
+    String? recordedAudioPath = item.customAudioPath;
+    bool isRecordingAudio = false;
+    bool isPlayingPreview = false;
+    bool removeAudio = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          title: const Text('Record Custom Voice'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '"${item.getLabel('en')}"',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                if (recordedAudioPath != null && !removeAudio)
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withAlpha(25),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.green.withAlpha(80)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.mic_rounded, color: Colors.green, size: 20),
+                        const SizedBox(width: 6),
+                        const Expanded(
+                          child: Text(
+                            'Recording saved',
+                            style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isPlayingPreview ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                            color: Colors.green,
+                            size: 20,
+                          ),
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.all(4),
+                          onPressed: () async {
+                            if (isPlayingPreview) {
+                              await _audioService.stopPlayback();
+                              setDlgState(() => isPlayingPreview = false);
+                            } else {
+                              setDlgState(() => isPlayingPreview = true);
+                              await _audioService.playRecording(recordedAudioPath!);
+                              await Future.delayed(const Duration(seconds: 3));
+                              if (ctx.mounted) {
+                                setDlgState(() => isPlayingPreview = false);
+                              }
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_rounded, color: Colors.red, size: 20),
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.all(4),
+                          onPressed: () async {
+                            if (recordedAudioPath != item.customAudioPath) {
+                              // It's a newly recorded one, safe to delete physically
+                              await _audioService.deleteRecording(recordedAudioPath!);
+                            }
+                            setDlgState(() => removeAudio = true);
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        isRecordingAudio ? Icons.stop_rounded : Icons.mic_rounded,
+                        color: isRecordingAudio ? Colors.red : null,
+                        size: 18,
+                      ),
+                      label: Text(
+                        isRecordingAudio ? 'Stop Recording' : 'Record Voice',
+                        style: isRecordingAudio ? const TextStyle(color: Colors.red) : null,
+                      ),
+                      style: isRecordingAudio
+                          ? OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.red, width: 2),
+                            )
+                          : null,
+                      onPressed: () async {
+                        if (isRecordingAudio) {
+                          final path = await _audioService.stopRecording();
+                          setDlgState(() {
+                            isRecordingAudio = false;
+                            recordedAudioPath = path;
+                            removeAudio = false;
+                          });
+                        } else {
+                          final fileName = 'tile_${DateTime.now().millisecondsSinceEpoch}';
+                          final path = await _audioService.startRecording(fileName);
+                          if (path != null) {
+                            setDlgState(() => isRecordingAudio = true);
+                          } else {
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                const SnackBar(content: Text('Microphone permission required')),
+                              );
+                            }
+                          }
+                        }
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (recordedAudioPath != null && recordedAudioPath != item.customAudioPath && !removeAudio) {
+                  _audioService.deleteRecording(recordedAudioPath!);
+                }
+                Navigator.pop(ctx);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final updated = item.copyWith(
+                  customAudioPath: removeAudio ? null : recordedAudioPath,
+                  clearCustomAudioPath: removeAudio,
+                );
+                await vocabularyProvider.updateVocabularyItem(updated);
+                
+                if (removeAudio && item.customAudioPath != null) {
+                  await _audioService.deleteRecording(item.customAudioPath!);
+                }
+                
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Voice updated for "${item.getLabel('en')}"',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ─── Usage stats tab ─────────────────────────────────────────────────────
 
   Widget _buildUsageStatsTab() {
@@ -463,37 +759,6 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     );
   }
 
-  // ─── Backup tab ───────────────────────────────────────────────────────────
-
-  Widget _buildBackupTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        const Text(
-          'Backup & Export',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.file_download_rounded),
-            title: const Text('Export All Data'),
-            subtitle: const Text('Export vocabulary, usage logs, and settings'),
-            onTap: () => _exportData(),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.file_upload_rounded),
-            title: const Text('Import Data'),
-            subtitle: const Text('Import from backup file'),
-            onTap: () => _importData(),
-          ),
-        ),
-      ],
-    );
-  }
-
   // ─── Add vocabulary dialog ────────────────────────────────────────────────
 
   Future<void> _showAddVocabularyDialog(
@@ -503,6 +768,9 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     final formKey = GlobalKey<FormState>();
     final wordController = TextEditingController();
     String? selectedImagePath;
+    String? recordedAudioPath;
+    bool isRecordingAudio = false;
+    bool isPlayingPreview = false;
     String selectedCategory = vocabularyProvider.allGroups.isNotEmpty
         ? vocabularyProvider.allGroups.first
         : 'QUICK';
@@ -544,18 +812,136 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                   const SizedBox(height: 16),
                   if (selectedImagePath != null)
                     _buildImagePreview(selectedImagePath!),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.image_rounded),
-                    label: const Text('Select Image'),
-                    onPressed: () async {
-                      final image = await _imagePicker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (image != null) {
-                        setDlgState(() => selectedImagePath = image.path);
-                      }
-                    },
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.photo_library_rounded),
+                        label: const Text('Gallery'),
+                        onPressed: () async {
+                          final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+                          if (image != null) {
+                            setDlgState(() => selectedImagePath = image.path);
+                          }
+                        },
+                      ),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.search_rounded),
+                        label: const Text('Web Search'),
+                        onPressed: () async {
+                          final path = await showDialog<String>(
+                            context: context,
+                            builder: (context) => const ImageSearchDialog(),
+                          );
+                          if (path != null) {
+                            setDlgState(() => selectedImagePath = path);
+                          }
+                        },
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 16),
+                  // Voice recording section
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Record custom voice (optional)',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (recordedAudioPath != null)
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withAlpha(25),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.green.withAlpha(80)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.mic_rounded, color: Colors.green, size: 20),
+                          const SizedBox(width: 6),
+                          const Expanded(
+                            child: Text(
+                              'Recording saved',
+                              style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              isPlayingPreview ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.all(4),
+                            onPressed: () async {
+                              if (isPlayingPreview) {
+                                await _audioService.stopPlayback();
+                                setDlgState(() => isPlayingPreview = false);
+                              } else {
+                                setDlgState(() => isPlayingPreview = true);
+                                await _audioService.playRecording(recordedAudioPath!);
+                                await Future.delayed(const Duration(seconds: 3));
+                                setDlgState(() => isPlayingPreview = false);
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_rounded, color: Colors.red, size: 20),
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.all(4),
+                            onPressed: () async {
+                              await _audioService.deleteRecording(recordedAudioPath!);
+                              setDlgState(() => recordedAudioPath = null);
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: Icon(
+                          isRecordingAudio ? Icons.stop_rounded : Icons.mic_rounded,
+                          color: isRecordingAudio ? Colors.red : null,
+                          size: 18,
+                        ),
+                        label: Text(
+                          isRecordingAudio ? 'Stop Recording' : 'Record Voice',
+                          style: isRecordingAudio ? const TextStyle(color: Colors.red) : null,
+                        ),
+                        style: isRecordingAudio
+                            ? OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.red, width: 2),
+                              )
+                            : null,
+                        onPressed: () async {
+                          if (isRecordingAudio) {
+                            final path = await _audioService.stopRecording();
+                            setDlgState(() {
+                              isRecordingAudio = false;
+                              recordedAudioPath = path;
+                            });
+                          } else {
+                            final fileName = 'tile_${DateTime.now().millisecondsSinceEpoch}';
+                            final path = await _audioService.startRecording(fileName);
+                            if (path != null) {
+                              setDlgState(() => isRecordingAudio = true);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Microphone permission required')),
+                                );
+                              }
+                            }
+                          }
+                        },
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -574,6 +960,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                     labels: {'en': wordController.text},
                     category: selectedCategory,
                     colorScheme: selectedColor,
+                    customAudioPath: recordedAudioPath,
                   );
                   await vocabularyProvider.addVocabularyItem(item);
                   if (context.mounted) Navigator.pop(context);
@@ -637,37 +1024,6 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
       'categoryCounts': categoryCounts,
       'totalTaps': totalTaps,
     };
-  }
-
-  // ─── Export / Import ──────────────────────────────────────────────────────
-
-  Future<void> _exportData() async {
-    try {
-      final data = await _storageService.exportAllData();
-      final jsonString = jsonEncode(data);
-
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File(
-          '${directory.path}/awaz_backup_${DateTime.now().millisecondsSinceEpoch}.json');
-      await file.writeAsString(jsonString);
-
-      if (!mounted) return;
-      await Share.shareXFiles([XFile(file.path)], subject: 'Awaz AAC Backup');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data exported successfully')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error exporting data: $e')),
-      );
-    }
-  }
-
-  Future<void> _importData() async {
-    // Implementation for importing data
-    // Would use file_picker to select a JSON file
   }
 
   Widget _buildImagePreview(String imagePath) {

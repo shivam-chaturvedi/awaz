@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/communication_provider.dart';
+import '../providers/settings_provider.dart';
 import 'communication_screen.dart';
 import 'custom_vocabulary_screen.dart';
 import 'settings_screen.dart';
@@ -88,26 +89,30 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
   Widget build(BuildContext context) {
     return Consumer<CommunicationProvider>(
       builder: (context, communicationProvider, _) {
+        
+
+        final appBarButtons = [
+          if (_currentIndex == 0)
+            IconButton(
+              icon: Icon(communicationProvider.isKeyboardMode
+                  ? Icons.grid_view_rounded
+                  : Icons.keyboard_rounded),
+              onPressed: () => _openKeyboard(context, communicationProvider),
+              tooltip: communicationProvider.isKeyboardMode
+                  ? 'Switch to Picture Mode'
+                  : 'Switch to Keyboard Mode',
+            ),
+          IconButton(
+            icon: const Icon(Icons.dashboard_rounded),
+            onPressed: () => _openCaregiverDashboard(context),
+            tooltip: 'Caregiver Dashboard',
+          ),
+        ];
+
         return Scaffold(
           appBar: AppBar(
             title: Text('${translate('app_name')} • ${_tabTitles[_validIndex]}'),
-            actions: [
-              if (_currentIndex == 0)
-                IconButton(
-                  icon: Icon(communicationProvider.isKeyboardMode
-                      ? Icons.grid_view_rounded
-                      : Icons.keyboard_rounded),
-                  onPressed: () => _openKeyboard(context, communicationProvider),
-                  tooltip: communicationProvider.isKeyboardMode
-                      ? 'Switch to Picture Mode'
-                      : 'Switch to Keyboard Mode',
-                ),
-              IconButton(
-                icon: const Icon(Icons.dashboard_rounded),
-                onPressed: () => _openCaregiverDashboard(context),
-                tooltip: 'Caregiver Dashboard',
-              ),
-            ],
+            actions: appBarButtons,
           ),
           body: IndexedStack(
             index: _validIndex,

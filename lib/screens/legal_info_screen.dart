@@ -260,7 +260,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       _privacyPolicyUri,
       mode: LaunchMode.externalApplication,
     );
-    if (!launched) {
+    if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to open privacy policy')),
       );

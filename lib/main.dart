@@ -204,11 +204,19 @@ class ChinnamApp extends StatelessWidget {
               home: const AwazHomeScreen(),
               // Enable accessibility
               builder: (context, child) {
-                return MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: TextScaler.linear(settings.iconSize),
+                final baseDirection = Directionality.of(context);
+                final finalDirection = settings.leftHandMode
+                    ? (baseDirection == TextDirection.rtl ? TextDirection.ltr : TextDirection.rtl)
+                    : baseDirection;
+
+                return Directionality(
+                  textDirection: finalDirection,
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: TextScaler.linear(settings.iconSize),
+                    ),
+                    child: child!,
                   ),
-                  child: child!,
                 );
               },
             );

@@ -19,6 +19,7 @@ class VocabularyInitializer {
     }
   }
 
+  // ignore: unused_field
   static const Map<String, String> _defaultImagePaths = {
     'Yes': 'assets/images/Yes.jpg',
     'No': 'assets/images/No.jpg',

@@ -14,6 +14,7 @@ class VocabularyItem {
   final VocabularyColorScheme colorScheme; // For color coding
   final int? gridPosition; // Position in grid
   final bool isFrozen; // For frozen row feature
+  final String? customAudioPath; // Path to recorded audio file
 
   VocabularyItem({
     required this.id,
@@ -29,6 +30,7 @@ class VocabularyItem {
     this.colorScheme = VocabularyColorScheme.blue,
     this.gridPosition,
     this.isFrozen = false,
+    this.customAudioPath,
   });
 
   String getLabel(String languageCode) {
@@ -53,6 +55,8 @@ class VocabularyItem {
     VocabularyColorScheme? colorScheme,
     int? gridPosition,
     bool? isFrozen,
+    String? customAudioPath,
+    bool clearCustomAudioPath = false,
   }) {
     return VocabularyItem(
       id: id ?? this.id,
@@ -68,6 +72,7 @@ class VocabularyItem {
       colorScheme: colorScheme ?? this.colorScheme,
       gridPosition: gridPosition ?? this.gridPosition,
       isFrozen: isFrozen ?? this.isFrozen,
+      customAudioPath: clearCustomAudioPath ? null : (customAudioPath ?? this.customAudioPath),
     );
   }
 
@@ -89,6 +94,7 @@ class VocabularyItem {
       colorScheme: _colorSchemeFromString(json['colorScheme'] as String?) ?? VocabularyColorScheme.blue,
       gridPosition: json['gridPosition'] as int?,
       isFrozen: json['isFrozen'] as bool? ?? false,
+      customAudioPath: json['customAudioPath'] as String?,
     );
   }
 
@@ -107,6 +113,7 @@ class VocabularyItem {
       'colorScheme': colorScheme.name,
       'gridPosition': gridPosition,
       'isFrozen': isFrozen,
+      'customAudioPath': customAudioPath,
     };
   }
 }
