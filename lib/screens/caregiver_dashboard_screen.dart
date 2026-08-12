@@ -462,9 +462,9 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                       }
                     },
                   ),
-                  OutlinedButton.icon(
+                    OutlinedButton.icon(
                     icon: const Icon(Icons.search_rounded),
-                    label: const Text('Web Search'),
+                    label: const Text('Search Online'),
                     onPressed: () async {
                       final path = await showDialog<String>(
                         context: context,
@@ -828,7 +828,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
                       ),
                       OutlinedButton.icon(
                         icon: const Icon(Icons.search_rounded),
-                        label: const Text('Web Search'),
+                        label: const Text('Search Online'),
                         onPressed: () async {
                           final path = await showDialog<String>(
                             context: context,

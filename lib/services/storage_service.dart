@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import '../models/vocabulary_item.dart';
+
 import '../models/app_settings.dart';
 import '../models/usage_log.dart';
+import '../models/vocabulary_item.dart';
 
 class StorageService {
   static final StorageService _instance = StorageService._internal();
@@ -44,7 +47,7 @@ class StorageService {
   Future<void> _initDatabase() async {
     try {
       final documentsDirectory = await getApplicationDocumentsDirectory();
-      final dbPath = join(documentsDirectory.path, 'awaz_database.db');
+      final dbPath = p.join(documentsDirectory.path, 'awaz_database.db');
 
       _database = await openDatabase(
         dbPath,
@@ -377,30 +380,67 @@ class StorageService {
     return _prefs!.getStringList('custom_groups') ?? [];
   }
 
-  // Export/Backup
+  // Export/Backup — includes custom words, settings, groups, and media bytes
+  // so another device can restore images and voice recordings.
   Future<Map<String, dynamic>> exportAllData() async {
     final vocabularyItems = await getAllVocabularyItems();
     final usageLogs = await getUsageLogs();
     final settings = await getSettings();
+    final customGroups = await getCustomGroups();
+    final media = <String, String>{};
+    final exportedItems = <Map<String, dynamic>>[];
+
+    for (final item in vocabularyItems) {
+      final json = item.toJson();
+      json['imagePath'] = await _embedMediaFile(item.imagePath, media);
+      json['customAudioPath'] = await _embedMediaFile(item.customAudioPath, media);
+      exportedItems.add(json);
+    }
 
     return {
-      'vocabulary_items': vocabularyItems.map((item) => item.toJson()).toList(),
+      'vocabulary_items': exportedItems,
       'usage_logs': usageLogs.map((log) => log.toJson()).toList(),
       'settings': settings.toJson(),
+      'custom_groups': customGroups,
+      'media': media,
       'export_date': DateTime.now().toIso8601String(),
+      'version': 2,
     };
   }
 
   Future<void> importData(Map<String, dynamic> data) async {
-    // Import vocabulary items
+    final media = (data['media'] as Map<String, dynamic>?) ?? {};
+    final documents = await getApplicationDocumentsDirectory();
+    final mediaDir = Directory(p.join(documents.path, 'imported_media'));
+    if (!await mediaDir.exists()) {
+      await mediaDir.create(recursive: true);
+    }
+
+    Future<String?> restoreMedia(String? key) async {
+      if (key == null || key.isEmpty) return null;
+      // Already a real local path from an older backup.
+      if (!media.containsKey(key) && await File(key).exists()) {
+        return key;
+      }
+      final encoded = media[key];
+      if (encoded is! String || encoded.isEmpty) return null;
+      final fileName = p.basename(key);
+      final outPath = p.join(mediaDir.path, fileName);
+      await File(outPath).writeAsBytes(base64Decode(encoded), flush: true);
+      return outPath;
+    }
+
     if (data['vocabulary_items'] != null) {
       for (var itemJson in data['vocabulary_items'] as List) {
-        final item = VocabularyItem.fromJson(itemJson as Map<String, dynamic>);
+        final map = Map<String, dynamic>.from(itemJson as Map);
+        map['imagePath'] = await restoreMedia(map['imagePath'] as String?);
+        map['customAudioPath'] =
+            await restoreMedia(map['customAudioPath'] as String?);
+        final item = VocabularyItem.fromJson(map);
         await saveVocabularyItem(item);
       }
     }
 
-    // Import usage logs
     if (data['usage_logs'] != null) {
       for (var logJson in data['usage_logs'] as List) {
         final log = UsageLog.fromJson(logJson as Map<String, dynamic>);
@@ -408,10 +448,36 @@ class StorageService {
       }
     }
 
-    // Import settings
     if (data['settings'] != null) {
-      final settings = AppSettings.fromJson(data['settings'] as Map<String, dynamic>);
+      final settings =
+          AppSettings.fromJson(data['settings'] as Map<String, dynamic>);
       await saveSettings(settings);
     }
+
+    if (data['custom_groups'] != null) {
+      final groups = (data['custom_groups'] as List)
+          .map((e) => e.toString())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      await saveCustomGroups(groups);
+    }
+  }
+
+  Future<String?> _embedMediaFile(
+    String? filePath,
+    Map<String, String> media,
+  ) async {
+    if (filePath == null || filePath.isEmpty) return null;
+    // Skip Flutter asset paths — they ship with the app.
+    if (filePath.startsWith('assets/')) return filePath;
+
+    final file = File(filePath);
+    if (!await file.exists()) return filePath;
+
+    final key = 'media/${p.basename(filePath)}';
+    if (!media.containsKey(key)) {
+      media[key] = base64Encode(await file.readAsBytes());
+    }
+    return key;
   }
 }

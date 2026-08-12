@@ -368,7 +368,7 @@ class _CustomVocabularyScreenState extends State<CustomVocabularyScreen> {
                 ),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.search_rounded),
-                  label: const Text('Web Search'),
+                  label: const Text('Search Online'),
                   onPressed: () async {
                     final path = await showDialog<String>(
                       context: context,
