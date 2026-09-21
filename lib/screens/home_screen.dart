@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_translate/flutter_translate.dart';
 import '../providers/communication_provider.dart';
+import '../providers/scan_provider.dart';
 import 'communication_screen.dart';
 import 'custom_vocabulary_screen.dart';
 import 'settings_screen.dart';
@@ -86,8 +87,8 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CommunicationProvider>(
-      builder: (context, communicationProvider, _) {
+    return Consumer2<CommunicationProvider, ScanProvider>(
+      builder: (context, communicationProvider, scanProvider, _) {
         final appBarButtons = <Widget>[
           if (_currentIndex == 0)
             IconButton(
@@ -99,6 +100,19 @@ class _AwazHomeScreenState extends State<AwazHomeScreen> {
                   ? 'Switch to Picture Mode'
                   : 'Switch to Keyboard Mode',
             ),
+          // Scan Mode toggle — always accessible without scanning
+          IconButton(
+            icon: Icon(
+              scanProvider.isScanModeEnabled
+                  ? Icons.accessibility_new_rounded
+                  : Icons.accessibility_rounded,
+              color: scanProvider.isScanModeEnabled ? const Color(0xFF1E88E5) : null,
+            ),
+            onPressed: () => scanProvider.toggleScanMode(),
+            tooltip: scanProvider.isScanModeEnabled
+                ? 'Scan Mode ON — tap to turn off'
+                : 'Turn on Scan Mode',
+          ),
           IconButton(
             icon: const Icon(Icons.dashboard_rounded),
             onPressed: () => _openCaregiverDashboard(context),

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'providers/vocabulary_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/communication_provider.dart';
+import 'providers/scan_provider.dart';
 import 'services/storage_service.dart';
 import 'services/tts_service.dart';
 import 'services/vocabulary_initializer.dart';
@@ -167,6 +168,7 @@ class ChinnamApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (context) => SettingsProvider()..loadSettings()),
           ChangeNotifierProvider(create: (context) => VocabularyProvider()),
+          ChangeNotifierProvider(create: (context) => ScanProvider()),
           ChangeNotifierProxyProvider2<VocabularyProvider, SettingsProvider, CommunicationProvider>(
             create: (context) {
               final vocabularyProvider = Provider.of<VocabularyProvider>(context, listen: false);
@@ -213,7 +215,7 @@ class ChinnamApp extends StatelessWidget {
                   textDirection: finalDirection,
                   child: MediaQuery(
                     data: MediaQuery.of(context).copyWith(
-                      textScaler: TextScaler.linear(settings.iconSize),
+                      textScaler: TextScaler.linear(settings.buttonFontSize),
                     ),
                     child: child!,
                   ),

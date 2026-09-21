@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_translate/flutter_translate.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../providers/settings_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../providers/scan_provider.dart';
 import '../models/app_settings.dart';
 import '../utils/language_utils.dart';
 import '../services/storage_service.dart';
@@ -61,9 +63,126 @@ class _SettingsTabState extends State<SettingsTab> {
           // Grid Layout
           ListTile(
             title: Text(translate('settings.grid_layout')),
-            subtitle: Text('${settings.gridRows} x ${settings.gridColumns}'),
+            subtitle: Text('Vocab: ${settings.gridRows}x${settings.gridColumns} | Groups: ${settings.groupGridRows}x${settings.groupGridColumns}'),
             trailing: const Icon(Icons.arrow_forward_ios_rounded),
             onTap: () => _showGridLayoutDialog(settingsProvider, settings),
+          ),
+          const Divider(),
+
+          // Item Sizes
+          ExpansionTile(
+            title: const Text('Item Sizes'),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.image_rounded, size: 20),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'App Display Scale',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${settings.iconSize.toStringAsFixed(1)}x',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text('0.5x', style: TextStyle(fontSize: 12)),
+                        Expanded(
+                          child: Slider(
+                            value: settings.iconSize.clamp(0.5, 2.0),
+                            min: 0.5,
+                            max: 2.0,
+                            divisions: 15,
+                            label: '${settings.iconSize.toStringAsFixed(1)}x',
+                            onChanged: (value) {
+                              settingsProvider.updateSettings(
+                                settings.copyWith(iconSize: value),
+                              );
+                            },
+                          ),
+                        ),
+                        const Text('2.0x', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.text_fields_rounded, size: 20),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Font Size',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${settings.buttonFontSize.toStringAsFixed(1)}x',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text('0.5x', style: TextStyle(fontSize: 12)),
+                        Expanded(
+                          child: Slider(
+                            value: settings.buttonFontSize.clamp(0.5, 2.0),
+                            min: 0.5,
+                            max: 2.0,
+                            divisions: 15,
+                            label: '${settings.buttonFontSize.toStringAsFixed(1)}x',
+                            onChanged: (value) {
+                              settingsProvider.updateSettings(
+                                settings.copyWith(buttonFontSize: value),
+                              );
+                            },
+                          ),
+                        ),
+                        const Text('2.0x', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const Divider(),
 
@@ -160,6 +279,81 @@ class _SettingsTabState extends State<SettingsTab> {
                     ),
                   ],
                 ),
+              ),
+              const Divider(height: 1),
+              // ── Scan Speed ────────────────────────────────────────────────
+              Consumer<ScanProvider>(
+                builder: (context, scanProvider, _) {
+                  final intervalSec = scanProvider.scanIntervalSeconds;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.accessibility_new_rounded, size: 20),
+                            const SizedBox(width: 8),
+                            const Expanded(
+                              child: Text(
+                                'Scan Speed',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${intervalSec.toStringAsFixed(intervalSec % 1 == 0 ? 0 : 1)}s',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'How long each row/item is highlighted before moving on',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Row(
+                          children: [
+                            const Text('0s',
+                                style: TextStyle(fontSize: 12)),
+                            Expanded(
+                              child: Slider(
+                                value: intervalSec.clamp(0.1, 10.0),
+                                min: 0.1,
+                                max: 10.0,
+                                divisions: 99, // 0.1 s steps
+                                label:
+                                    '${intervalSec.toStringAsFixed(1)}s',
+                                activeColor:
+                                    const Color(0xFF1565C0), // scan blue
+                                onChanged: (value) {
+                                  scanProvider.setScanInterval(value);
+                                },
+                              ),
+                            ),
+                            const Text('10s',
+                                style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -302,47 +496,84 @@ class _SettingsTabState extends State<SettingsTab> {
   ) {
     int rows = settings.gridRows;
     int columns = settings.gridColumns;
+    int groupRows = settings.groupGridRows;
+    int groupColumns = settings.groupGridColumns;
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setState) => AlertDialog(
           title: Text(translate('settings.grid_layout')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GridLayoutPreview(rows: rows, columns: columns),
-              const SizedBox(height: 8),
-              Text('Rows: $rows'),
-              Slider(
-                value: rows.toDouble(),
-                min: 2,
-                max: 5,
-                divisions: 3,
-                label: '$rows',
-                onChanged: (value) {
-                  setState(() => rows = value.toInt());
-                },
-              ),
-              Text('Columns: $columns'),
-              Slider(
-                value: columns.toDouble(),
-                min: 2,
-                max: 4,
-                divisions: 2,
-                label: '$columns',
-                onChanged: (value) {
-                  setState(() => columns = value.toInt());
-                },
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Vocabulary Grid', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                GridLayoutPreview(rows: rows, columns: columns),
+                const SizedBox(height: 8),
+                Text('Rows: $rows'),
+                Slider(
+                  value: rows.toDouble(),
+                  min: 2,
+                  max: 5,
+                  divisions: 3,
+                  label: '$rows',
+                  onChanged: (value) {
+                    setState(() => rows = value.toInt());
+                  },
+                ),
+                Text('Columns: $columns'),
+                Slider(
+                  value: columns.toDouble(),
+                  min: 2,
+                  max: 4,
+                  divisions: 2,
+                  label: '$columns',
+                  onChanged: (value) {
+                    setState(() => columns = value.toInt());
+                  },
+                ),
+                const Divider(),
+                const Text('Main Groups Grid', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                GridLayoutPreview(rows: groupRows, columns: groupColumns),
+                const SizedBox(height: 8),
+                Text('Rows: $groupRows'),
+                Slider(
+                  value: groupRows.toDouble(),
+                  min: 2,
+                  max: 5,
+                  divisions: 3,
+                  label: '$groupRows',
+                  onChanged: (value) {
+                    setState(() => groupRows = value.toInt());
+                  },
+                ),
+                Text('Columns: $groupColumns'),
+                Slider(
+                  value: groupColumns.toDouble(),
+                  min: 2,
+                  max: 5,
+                  divisions: 3,
+                  label: '$groupColumns',
+                  onChanged: (value) {
+                    setState(() => groupColumns = value.toInt());
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () async {
-                final shouldUpdate = rows != settings.gridRows || columns != settings.gridColumns;
-                if (shouldUpdate) {
-                  await settingsProvider.setGridLayout(rows, columns);
-                }
+                final updated = settings.copyWith(
+                  gridRows: rows,
+                  gridColumns: columns,
+                  groupGridRows: groupRows,
+                  groupGridColumns: groupColumns,
+                );
+                await settingsProvider.updateSettings(updated);
                 if (dialogContext.mounted) Navigator.pop(dialogContext);
               },
               child: Text(translate('settings.done')),
@@ -439,8 +670,11 @@ class GridLayoutPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final previewRows = rows.clamp(1, 5);
-    final previewColumns = columns.clamp(1, 4);
+    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+    final baseRows = rows.clamp(1, 5);
+    final baseCols = columns.clamp(1, 4);
+    final previewRows = isPortrait ? math.max(baseRows, baseCols) : math.min(baseRows, baseCols);
+    final previewColumns = isPortrait ? math.min(baseRows, baseCols) : math.max(baseRows, baseCols);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

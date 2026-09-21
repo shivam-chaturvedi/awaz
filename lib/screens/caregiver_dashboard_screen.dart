@@ -40,13 +40,14 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
     final settings = Provider.of<SettingsProvider>(context).settings;
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Caregiver Dashboard'),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Vocabulary'),
+              Tab(text: 'Groups'),
               Tab(text: 'Usage Stats'),
             ],
           ),
@@ -54,6 +55,7 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
         body: TabBarView(
           children: [
             _buildVocabularyTab(vocabularyProvider, settings),
+            _buildGroupsTab(vocabularyProvider, settings),
             _buildUsageStatsTab(),
           ],
         ),
@@ -97,6 +99,164 @@ class _CaregiverDashboardScreenState extends State<CaregiverDashboardScreen> {
           );
         }),
       ],
+    );
+  }
+
+  // ─── Groups tab ──────────────────────────────────────────────────────────
+
+  Widget _buildGroupsTab(
+    VocabularyProvider vocabularyProvider,
+    AppSettings settings,
+  ) {
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        const Text(
+          'Group Images Management',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tap any group to assign or change its custom image.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        ...vocabularyProvider.allGroups.map((groupName) {
+          final imagePath = settings.groupImages[groupName];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: imagePath != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image(
+                        image: ImageHelper.getImageProvider(imagePath),
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.image_rounded),
+                    ),
+              title: Text(groupName, style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(imagePath != null ? 'Custom image set' : 'Using default icon'),
+              trailing: const Icon(Icons.edit_rounded),
+              onTap: () => _showChangeGroupImageDialog(settingsProvider, settings, groupName),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  void _showChangeGroupImageDialog(
+    SettingsProvider settingsProvider,
+    AppSettings settings,
+    String groupName,
+  ) {
+    String? selectedImagePath = settings.groupImages[groupName];
+    bool removeImage = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          title: Text('Change Image for $groupName'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selectedImagePath != null && !removeImage)
+                _buildImagePreview(selectedImagePath!),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.photo_library_rounded),
+                    label: const Text('Gallery'),
+                    onPressed: () async {
+                      final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+                      if (image != null) {
+                        setDlgState(() {
+                          selectedImagePath = image.path;
+                          removeImage = false;
+                        });
+                      }
+                    },
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.search_rounded),
+                    label: const Text('Search Online'),
+                    onPressed: () async {
+                      final path = await showDialog<String>(
+                        context: context,
+                        builder: (context) => const ImageSearchDialog(),
+                      );
+                      if (path != null) {
+                        setDlgState(() {
+                          selectedImagePath = path;
+                          removeImage = false;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (settings.groupImages.containsKey(groupName) || (selectedImagePath != null && !removeImage))
+                TextButton.icon(
+                  onPressed: () {
+                    setDlgState(() {
+                      removeImage = true;
+                    });
+                  },
+                  icon: const Icon(Icons.delete_rounded, color: Colors.red),
+                  label: const Text('Remove Image', style: TextStyle(color: Colors.red)),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final updatedImages = Map<String, String>.from(settings.groupImages);
+                if (removeImage) {
+                  updatedImages.remove(groupName);
+                } else if (selectedImagePath != null) {
+                  updatedImages[groupName] = selectedImagePath!;
+                }
+                
+                await settingsProvider.updateSettings(
+                  settings.copyWith(groupImages: updatedImages),
+                );
+                
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Image updated for $groupName',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

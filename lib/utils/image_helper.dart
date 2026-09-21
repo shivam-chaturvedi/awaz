@@ -10,3 +10,13 @@ Widget buildImageFromPath(String imagePath, {double? height, double? width}) {
     errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_rounded),
   );
 }
+
+class ImageHelper {
+  static ImageProvider getImageProvider(String imagePath) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      return NetworkImage(imagePath);
+    } else {
+      return FileImage(File(imagePath));
+    }
+  }
+}

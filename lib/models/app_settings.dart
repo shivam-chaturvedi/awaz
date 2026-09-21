@@ -3,7 +3,11 @@ class AppSettings {
   final AppThemeMode themeMode; // light, dark, highContrast
   final int gridRows;
   final int gridColumns;
+  final int groupGridRows;
+  final int groupGridColumns;
+  final Map<String, String> groupImages;
   final double iconSize; // Percentage or fixed size
+  final double buttonFontSize; // Font size multiplier
   final bool showTextLabels;
   final bool enableSoundEffects;
   final bool enableVibration;
@@ -25,7 +29,11 @@ class AppSettings {
     this.themeMode = AppThemeMode.light,
     this.gridRows = 4,
     this.gridColumns = 4,
+    this.groupGridRows = 4,
+    this.groupGridColumns = 3,
+    this.groupImages = const {},
     this.iconSize = 1.0,
+    this.buttonFontSize = 1.0,
     this.showTextLabels = true,
     this.enableSoundEffects = true,
     this.enableVibration = false,
@@ -48,7 +56,11 @@ class AppSettings {
     AppThemeMode? themeMode,
     int? gridRows,
     int? gridColumns,
+    int? groupGridRows,
+    int? groupGridColumns,
+    Map<String, String>? groupImages,
     double? iconSize,
+    double? buttonFontSize,
     bool? showTextLabels,
     bool? enableSoundEffects,
     bool? enableVibration,
@@ -70,7 +82,11 @@ class AppSettings {
       themeMode: themeMode ?? this.themeMode,
       gridRows: gridRows ?? this.gridRows,
       gridColumns: gridColumns ?? this.gridColumns,
+      groupGridRows: groupGridRows ?? this.groupGridRows,
+      groupGridColumns: groupGridColumns ?? this.groupGridColumns,
+      groupImages: groupImages ?? this.groupImages,
       iconSize: iconSize ?? this.iconSize,
+      buttonFontSize: buttonFontSize ?? this.buttonFontSize,
       showTextLabels: showTextLabels ?? this.showTextLabels,
       enableSoundEffects: enableSoundEffects ?? this.enableSoundEffects,
       enableVibration: enableVibration ?? this.enableVibration,
@@ -96,7 +112,14 @@ class AppSettings {
       themeMode: _themeModeFromString(json['themeMode'] as String?),
       gridRows: json['gridRows'] as int? ?? 4,
       gridColumns: json['gridColumns'] as int? ?? 4,
+      groupGridRows: json['groupGridRows'] as int? ?? 4,
+      groupGridColumns: json['groupGridColumns'] as int? ?? 3,
+      groupImages: (json['groupImages'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
       iconSize: (json['iconSize'] as num?)?.toDouble() ?? 1.0,
+      buttonFontSize: (json['buttonFontSize'] as num?)?.toDouble() ?? 1.0,
       showTextLabels: json['showTextLabels'] as bool? ?? true,
       enableSoundEffects: json['enableSoundEffects'] as bool? ?? true,
       enableVibration: json['enableVibration'] as bool? ?? false,
@@ -124,7 +147,11 @@ class AppSettings {
       'themeMode': themeMode.name,
       'gridRows': gridRows,
       'gridColumns': gridColumns,
+      'groupGridRows': groupGridRows,
+      'groupGridColumns': groupGridColumns,
+      'groupImages': groupImages,
       'iconSize': iconSize,
+      'buttonFontSize': buttonFontSize,
       'showTextLabels': showTextLabels,
       'enableSoundEffects': enableSoundEffects,
       'enableVibration': enableVibration,
